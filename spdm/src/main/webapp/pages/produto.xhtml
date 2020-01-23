@@ -191,7 +191,7 @@
 							<h:outputText value="ATIVO" style="color: blue;" rendered="#{rst.flgAtivo == 'S'}"/>
 							<h:outputText value="INATIVO" style="color:red;" rendered="#{rst.flgAtivo == 'N'}"/>
 						</rich:column>
-						<rich:column style="text-align: center;">
+						<rich:column style="text-align: center; vertical-align: middle;">
 							<a4j:commandButton image="../images/visualizar.png" style="border:none; width: 18px; height: 18px;" title="VISUALIZAR" action="#{crudBean.visualizar}" render="formulario" oncomplete="#{rich:component('panVisualizar')}.show();">
 								<f:setPropertyActionListener target="#{crudBean.entity}" value="#{rst}" />
 							</a4j:commandButton>
