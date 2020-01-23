@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition	xmlns="http://www.w3.org/1999/xhtml"
+			    xmlns:ui="http://java.sun.com/jsf/facelets"
+			    xmlns:h="http://java.sun.com/jsf/html"
+				xmlns:f="http://java.sun.com/jsf/core"
+				xmlns:a4j="http://richfaces.org/a4j"
+				xmlns:rich="http://richfaces.org/rich"
+				xmlns:mj="http://mojarra.dev.java.net/mojarra_ext"
+				xmlns:t="http://myfaces.apache.org/tomahawk"
+				template="crud_template.xhtml">
+			
+			
+	<ui:param name="crudBean" value="#{producaoDiaBean}" />	
+		
+	<ui:define name="saveStateObjectsDefined">
+		<t:saveState value="#{crudBean.qtdTotalMassa}" />
+		<t:saveState value="#{crudBean.qtdTotalMassaStr}" />
+		<t:saveState value="#{crudBean.obsProducao}" />
+		<t:saveState value="#{crudBean.msgObservacao}" />
+	</ui:define>
+		
+	<ui:define name="content">
+		<h:panelGroup id="panelGroupDePesquisa" style="height:100%;width:100%;" rendered="#{crudBean.searching}">
+			<f:subview id="viewBusca">
+				<div class="box-body">
+                    <div class="form-group">
+                      <label for="inputEmail3" class="col-sm-2 control-label">Data * </label>
+                      <div class="col-sm-2" style="width: 13% !important;">
+	                	  <rich:calendar value="#{crudBean.searchObject.datPedido}" buttonClass="glyphicon glyphicon-calendar" inputSize="9" buttonIcon="../images/calendar.png"  datePattern="dd/MM/yyyy" inputClass="form-control" showWeeksBar="false" enableManualInput="true" oninputkeypress="return formataData(event,this);" maxlength="10"/>
+	                  </div>
+                    </div>
+            	</div>
+			</f:subview>
+		</h:panelGroup>	
+	</ui:define>
+	
+	<ui:define name="buttonItens" style="height:100%; width:100%;">		
+		<h:panelGroup rendered="#{crudBean.searching}">
+			<a4j:commandButton id="pesquisar" styleClass="btn btn-primary" value="Pesquisar (P)" accesskey="P" actionListener="#{crudBean.pesquisar}" render="tblResult, formulario"/>
+			<h:outputText value=" "/>
+			<t:commandLink target="_blank" id="imprimir" action="#{crudBean.imprimir}" styleClass="btn btn-primary" value="Imprimir (I)"/>
+			<h:outputText value=" "/>
+			<a4j:commandButton id="observacao" styleClass="btn btn-primary" value="+ Observacao (O)" accesskey="O" actionListener="#{crudBean.preparaObservacao}" oncomplete="#{rich:component('panObservacaoProducao')}.show();" rendered="#{not empty crudBean.searchResult and crudBean.searching}" render="panObservacaoProducao"/>
+		</h:panelGroup>		
+	</ui:define>
+					
+	<ui:define name="list">
+		<h:panelGrid id="tblResult" layout="block" style="width: 100%; height: 100%;z" >
+			<f:subview id="viewListagem">
+				<div class="box-content">
+					<rich:dataTable id="tblData" 
+								 value="#{crudBean.searchResult}" 
+							       var="rst" rows="10"
+							styleClass="table table-bordered table-striped dataTable"
+					    onrowmouseover="this.style.cursor='default';this.style.backgroundColor='#FFF8DC';" 
+					  	 onrowmouseout="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"
+							  rendered="#{not empty crudBean.searchResult and crudBean.searching}">						     
+						<f:facet name="header">
+							<rich:columnGroup>
+								<rich:column colspan="8" style="text-align: left; font-size: small;" rendered="#{crudBean.msgObservacao != null}">
+									<h:outputText value="#{crudBean.msgObservacao}"/>
+								</rich:column>
+								<rich:column colspan="5" style="text-align: left; color: blue;"  breakRowBefore="true">
+									<h:outputText value="MASSA: "/>
+									<h:outputText value="#{crudBean.qtdTotalMassa}" converter="converterMoeda"/>
+									<h:outputText value="kg"/>
+								</rich:column>
+								<rich:column colspan="4" style="text-align: center;">
+									Prioridade						
+								</rich:column>
+								<rich:column style="width: 5%; text-align: center;" breakRowBefore="true">
+									Código
+								</rich:column>
+								<rich:column style="width: 25%; text-align: center;">
+									Receita
+								</rich:column>
+								<rich:column style="text-align: center;">
+									Descrição
+								</rich:column>
+								<rich:column style="width: 10%; text-align: center;">
+									Quantidade
+								</rich:column>
+								<rich:column style="width: 10%; text-align: center;">
+									Massa (g)
+								</rich:column>
+								<rich:column style="width: 5%; text-align: center;">
+									1
+								</rich:column>
+								<rich:column style="width: 5%; text-align: center;">
+									2
+								</rich:column>
+								<rich:column style="width: 5%; text-align: center;">
+									3
+								</rich:column>
+								<rich:column style="width: 5%; text-align: center;">
+									4
+								</rich:column>									
+							</rich:columnGroup>
+						</f:facet>
+						<rich:column style="text-align: right;">
+							<h:outputText value="#{rst.idProduto}"/>							
+						</rich:column>
+						<rich:column style="text-align: left;">
+							<h:outputText value="#{rst.receita.desReceita}" />
+						</rich:column>
+						<rich:column style="text-align: left;">
+							<h:outputText value="#{rst.desProduto}" />
+							<h:outputText value=" - "/>
+							<h:outputText value="#{rst.qtdMassaCrua}"/>
+							<h:outputText value="g"/>
+						</rich:column>
+						<rich:column style="text-align: center;">
+							<h:outputText value="#{rst.qtdSolicitada}" />
+						</rich:column>
+						<rich:column style="text-align: center;">
+							<h:outputText value="#{rst.qtdMassa}" converter="converterKg"/>
+						</rich:column>
+						<rich:column style="text-align: center;">
+							<h:outputText value="#{rst.prioridade1}" />
+						</rich:column>
+						<rich:column style="text-align: center;">
+							<h:outputText value="#{rst.prioridade2}" />
+						</rich:column>
+						<rich:column style="text-align: center;">
+							<h:outputText value="#{rst.prioridade3}" />
+						</rich:column>
+						<rich:column style="text-align: center;">
+							<h:outputText value="#{rst.prioridade4}" />
+						</rich:column>
+					</rich:dataTable>
+				</div>
+				<h:panelGroup style="color: #D8D8D8" rendered="#{not empty crudBean.searchResult and crudBean.searching}"><div align="right">Foi(ram) encontrado(s) <h:outputText value="#{crudBean.searchResult.size()}"/> registro(s). &nbsp;&nbsp; </div></h:panelGroup>
+				<h:panelGroup layout="block" style="padding: 16px; text-align: center;" rendered="#{not empty crudBean.searchResult and crudBean.searching}">
+					<rich:dataScroller for="tblData" maxPages="10" />
+				</h:panelGroup>
+			</f:subview>
+		</h:panelGrid>
+	</ui:define>
+	
+	<ui:define name="modal">
+		<rich:popupPanel id="panObservacaoProducao" styleClass="modal-content" domElementAttachment="form" modal="true" width="800" height="280" resizeable="false" onmaskclick="#{rich:component('panObservacaoProducao')}.hide()">
+			<ui:include src="panelObservacaoProducao.xhtml" />
+		</rich:popupPanel>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html 		xmlns="http://www.w3.org/1999/xhtml"
+			xmlns:ui="http://java.sun.com/jsf/facelets"
+			xmlns:h="http://java.sun.com/jsf/html"
+			xmlns:f="http://java.sun.com/jsf/core"
+			xmlns:a4j="http://richfaces.org/a4j"
+			xmlns:rich="http://richfaces.org/rich"
+			xmlns:mj="http://mojarra.dev.java.net/mojarra_ext"
+			xmlns:t="http://myfaces.apache.org/tomahawk">
+			
+	<f:loadBundle basename="ApplicationResources" var="bundle"/>
+			
+	<h:head>	
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		
+	    <link rel="stylesheet" href="../layout/bootstrap/css/bootstrap.min.css"/>
+	    <link rel="stylesheet" href="../layout/dist/css/AdminLTE.min.css"/>	
+	    <link rel="stylesheet" href="../layout/plugins/iCheck/square/blue.css"/>
+	    <link rel="stylesheet" href="../css/main.css"/>
+	    <link rel="shortcut icon" href="../images/favicon.ico"/>
+	
+		<title>
+			<h:outputText value="#{bundle.tituloAplicacao}" /> 
+		</title>		 
+	</h:head>
+	
+	<h:body class="hold-transition login-page">
+	
+		<rich:popupPanel id="panel_loading" autosized="true" modal="true" style="z-index: 100000;">
+			<table>
+				<tr>
+					<td><h:graphicImage url="../images/ajax-loader.gif" style="border:0px; vertical-align: middle; padding: 5px;" /></td>
+					<td><h:outputText value=" Aguarde..." /></td>
+				</tr>
+			</table>
+		</rich:popupPanel>
+		
+		<a4j:status id="loading" onstart="#{rich:component('panel_loading')}.show();" onstop="#{rich:component('panel_loading')}.hide();" />
+		
+		<a4j:outputPanel style="width:100%;height:100%;" ajaxRendered="true">
+			<rich:messages layout="table" globalOnly="true" errorClass="alert alert-danger" infoClass="alert alert-success" warnClass="alertLoginSucess" id="messages"/>
+		</a4j:outputPanel>
+		
+		<div class="login-box">
+		
+	    	<div class="login-logo">
+		    	
+		    </div>
+		    
+      		<div class="login-box-body" style="width: 400px;">
+      		
+      			<div align="center"><img src="../images/logo-new3.jpg" alt="" /></div>
+      		
+        		<p class="login-box-msg">Realize o login para iniciar sua sessão</p>
+        		
+        		<h:form action="../../index2.html" method="post">
+	          		<div class="form-group has-feedback">
+	            		
+	            		<h:inputText id="login" class="form-control" value="#{loginBean.usuario.login}" maxlength="100" style="text-transform: none;" autocomplete="off">
+							<f:passThroughAttribute name="placeholder" value="Login"/>
+						</h:inputText>
+	            		<span class="glyphicon glyphicon-user form-control-feedback"></span>
+	          		</div>
+	          		
+          			<div class="form-group has-feedback">
+          				<h:inputSecret id="senha" class="form-control" value="#{loginBean.usuario.senha}" maxlength="100" style="text-transform: none;" autocomplete="off">
+		                	<f:passThroughAttribute name="placeholder" value="Senha"/>
+		               	</h:inputSecret>
+            			<span class="glyphicon glyphicon-lock form-control-feedback"></span>
+          			</div>
+          
+          			<div class="row">
+			            <div class="col-xs-8">
+			              <div class="checkbox icheck">
+			                <label>
+			               
+			                </label>
+			              </div>
+			            </div><!-- /.col -->
+			            <div class="col-xs-4">
+			              <h:commandButton styleClass="btn btn-primary btn-block btn-flat" id="logar" action="#{loginBean.login}" value="Entrar"/>
+			            </div><!-- /.col -->
+			   		</div>
+			   		
+			   		
+			   		<!--  Panel de Recuperar Senha -->
+			   		
+			   		<rich:popupPanel id="panRecuperarSenha" domElementAttachment="form" modal="true" width="600" height="175" resizeable="false" onmaskclick="#{rich:component('panRecuperarSenha')}.hide()">
+					<f:facet name="header">
+						<h:panelGroup>
+							<h:outputText value="Esqueci Minha Senha" />
+						</h:panelGroup>
+					</f:facet>
+			
+					<f:facet name="controls">
+						<h:outputLink value="#" onclick="#{rich:component('panRecuperarSenha')}.hide(); return false;">
+					    	<h:graphicImage value="../images/closeModal.png" id="fechaPanelRecuperarSenha" style="width: 18px; height: 18px; vertical-align:middle;"/>
+				       	</h:outputLink>
+					</f:facet>
+						
+					<div class="box-body">
+	                    <div class="form-group">                      
+	                      <div class="col-sm-12">
+							<h:inputText styleClass="form-control" value="#{loginBean.emailRecuperarSenha}" onblur="validarEmail(this);" autocomplete="off">
+								<f:passThroughAttribute name="placeholder" value="Informe seu E-mail"/>
+							</h:inputText>
+						  </div>
+						</div>
+					</div>
+					
+					<br/>
+					
+					<div align="center">
+						<a4j:commandButton styleClass="btn btn-primary btn-block btn-flat" id="enviar" actionListener="#{loginBean.recuperarSenha}" style="width:20%" value="Enviar" oncomplete="validarRecuperarSenha('#{loginBean.mensagem}')" />
+					</div>
+					
+					<script>
+						function validarRecuperarSenha(msg)
+						{
+							if(msg == '')
+							{
+								#{rich:component('panRecuperarSenha')}.hide();
+							}
+							else
+							{
+								alert(msg);
+							}
+						}
+					</script>
+					
+				</rich:popupPanel>
+				<!-- Fim -->	
+			   		
+			   		
+        		</h:form>
+
+       
+
+        		<a4j:commandLink value="Esqueci minha senha" actionListener="#{loginBean.preparaRecuperarSenha}" oncomplete="#{rich:component('panRecuperarSenha')}.show()" render="panRecuperarSenha"/><br/>
+
+      		</div><!-- /.login-box-body -->
+    	</div>
+    	
+    	<script src="../js/custom.js"></script>
+    	<script src="../layout/plugins/jQuery/jQuery-2.1.4.min.js"></script>
+    	<script src="../layout/bootstrap/js/bootstrap.min.js"></script>
+  		<script src="../layout/plugins/iCheck/icheck.min.js"></script>
+    
+	    <script>
+	      $(function () {
+	        $('input').iCheck({
+	          checkboxClass: 'icheckbox_square-blue',
+	          radioClass: 'iradio_square-blue',
+	          increaseArea: '20%' // optional
+	        });
+	      });
+	    </script>
+	</h:body>
+</html>
