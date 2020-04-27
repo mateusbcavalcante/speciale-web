@@ -172,7 +172,7 @@ public class ProducaoPeriodoBean extends AbstractBean<Pedido, PedidoService>
 	{
 		this.REPORT_NAME = "producao-periodo";
 		
-		parameters.put("IMG_LOGO", request.getRealPath("images/logo-new3.jpg"));
+		parameters.put("IMG_LOGO", request.getRealPath("images/GBlogo-pos_pr_hor-c_fogo.png"));
 		parameters.put("DAT_PEDIDO_INICIAL", new SimpleDateFormat("dd/MM/yyyy").format(((Pedido) this.getListaReport().get(0)).getDatPedidoInicio()));
 		parameters.put("DAT_PEDIDO_FINAL", new SimpleDateFormat("dd/MM/yyyy").format(((Pedido) this.getListaReport().get(0)).getDatPedidoFim()));
 	}

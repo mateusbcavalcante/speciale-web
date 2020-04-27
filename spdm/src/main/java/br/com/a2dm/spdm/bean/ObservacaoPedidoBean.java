@@ -149,7 +149,7 @@ public class ObservacaoPedidoBean extends AbstractBean<Pedido, PedidoService>
 			elementPedido.setObsPedido(elementPedido.getObsPedido().replace("\n", ""));
 		}
 		
-		parameters.put("IMG_LOGO", request.getRealPath("images/logo-new3.jpg"));
+		parameters.put("IMG_LOGO", request.getRealPath("images/GBlogo-pos_pr_hor-c_fogo.png"));
 		parameters.put("DAT_PEDIDO", new SimpleDateFormat("dd/MM/yyyy").format(((Pedido)this.getListaReport().get(0)).getDatPedido()));
 	}
 		

@@ -105,6 +105,7 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 				completarPesquisar();
 				
 				Pedido pedido = new Pedido();
+				pedido.setFlgAtivo("S");
 				pedido.setFiltroMap(new HashMap<String, Object>());
 				pedido.getFiltroMap().put("flgAtivoPedidoProduto", "S");
 				

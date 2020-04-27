@@ -332,6 +332,7 @@ public class ClienteBean extends AbstractBean<Cliente, ClienteService>
 				//GUARDAR TODOS OS IDS DOS PRODUTOS ADICIONADOS COM FLAG S
 				Produto produto = new Produto();
 				produto.setIdProduto(produtoResult.getIdProduto());
+				produto.setVlrUnidadeFormatado(produtoResult.getVlrUnidadeFormatado());
 				produto.setFlgAtivo("S");
 				listaAdicionados.add(produto);
 			}
@@ -497,7 +498,8 @@ public class ClienteBean extends AbstractBean<Cliente, ClienteService>
 	
 	public void atualizarValorUnidade(Produto produto) {
 		try {
-			ClienteService.getInstancia().atualizarValorUnidade(getEntity().getIdCliente(), produto);
+			ClienteService.getInstancia().atualizarValorUnidade(getEntity().getIdCliente(), this.getListaProdutoResult(), produto);
+			System.out.println(this.getListaProdutoResult());
 		}
 		catch (Exception e) 
 		{

@@ -1730,7 +1730,7 @@ deg
 }
 
 .box.box-primary {
-	border-top-color: #b16a30;
+	border-top-color: #f9a31d;
 }
 
 .box.box-info {
@@ -2523,12 +2523,12 @@ deg
 }
 
 .btn-primary {
-	background-color: #b16a30;
-	border-color: #9e5d28
+	background-color: #f9a31d;
+	border-color: #ea3b26
 }
 
 .btn-primary:hover, .btn-primary:active, .btn-primary.hover {
-	background-color: #9e5d28
+	background-color: #ea3b26
 }
 
 .btn-success {

@@ -1917,7 +1917,7 @@
 }
 
 .skin-purple-light .main-header .navbar {
-	background: url("../../../../images/fundo.png");
+	background-color: black;
 }
 
 .skin-purple-light .main-header .navbar .nav>li>a {
@@ -1965,7 +1965,7 @@
 }
 
 .skin-purple-light .main-header .logo {
-	background: url("../../../../images/fundo.png");
+	background-color: black;
 	border-bottom: 0 solid transparent
 }
 
