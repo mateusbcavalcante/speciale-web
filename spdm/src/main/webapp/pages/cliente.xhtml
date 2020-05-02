@@ -257,7 +257,6 @@
 								<rich:column style="width: 3%; text-align: center;" />
 								<rich:column style="width: 3%; text-align: center;" />
 								<rich:column style="width: 3%; text-align: center;" />
-								<rich:column style="width: 3%; text-align: center;" />
 							</rich:columnGroup>
 						</f:facet>
 						<rich:column style="text-align: right;">
@@ -293,11 +292,6 @@
 							</a4j:commandButton>
 						</rich:column>
 						<rich:column style="text-align: center; vertical-align: middle;">
-							<a4j:commandButton image="../images/valor.png" style="border:none; width: 18px; height: 18px;" title="PREÇO POR PRODUTO" action="#{crudBean.visualizar}" render="formulario" oncomplete="#{rich:component('panVisualizarPrecoProduto')}.show();">
-								<f:setPropertyActionListener target="#{crudBean.entity}" value="#{rst}" />
-							</a4j:commandButton>
-						</rich:column>
-						<rich:column style="text-align: center; vertical-align: middle;">
 							<a4j:commandButton image="../images/edit.png" style="border:none; width: 18px; height: 18px;" title="ALTERAR" action="#{crudBean.preparaAlterar}" rendered="#{rst.flgAtivo == 'S' and sessionScope.loginUsuario.idGrupo == bundle.grupoGerente}" render="formulario, panelTitle">
 								<f:setPropertyActionListener target="#{crudBean.entity}" value="#{rst}" />
 							</a4j:commandButton>
@@ -323,10 +317,6 @@
 	<ui:define name="modal">
 		<rich:popupPanel id="panVisualizar" styleClass="modal-content" domElementAttachment="form" modal="true" width="1110" height="580" resizeable="false" onmaskclick="#{rich:component('panVisualizar')}.hide()">
 			<ui:include src="panelVisualizarCliente.xhtml" />
-		</rich:popupPanel>
-		
-		<rich:popupPanel id="panVisualizarPrecoProduto" styleClass="modal-content" domElementAttachment="form" modal="true" width="1110" height="580" resizeable="false" onmaskclick="#{rich:component('panVisualizarPrecoProduto')}.hide()">
-			<ui:include src="panelVisualizarPrecoProduto.xhtml" />
 		</rich:popupPanel>
 	</ui:define>
 			

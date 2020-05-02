@@ -117,7 +117,7 @@
 											<rich:column style="width: 5%; text-align: center;">
 												Código
 											</rich:column>
-											<rich:column style="width: 68%; text-align: center;">
+											<rich:column style="width: 48%; text-align: center;">
 												Descrição
 											</rich:column>
 											<rich:column style="width: 9%; text-align: center;">
@@ -129,6 +129,13 @@
 											<rich:column style="width: 9%; text-align: center;">
 												Qtd Múlt
 											</rich:column>
+											<rich:column style="width: 10%; text-align: center;">
+												Vlr Und (R$)
+											</rich:column>
+											<rich:column style="width: 10%; text-align: center;">
+												Vlr Kg (R$)
+											</rich:column>
+															
 										</rich:columnGroup>
 									</f:facet>
 									<rich:column style="text-align: right;">
@@ -145,6 +152,12 @@
 									</rich:column>
 									<rich:column style="text-align: right;">
 										<h:outputText value="#{rst.produto.qtdMultiplo}" />
+									</rich:column>
+									<rich:column style="text-align: right;">
+										<h:outputText value="#{rst.vlrUnidade}" converter="converterMoeda"/>
+									</rich:column>
+									<rich:column style="text-align: right;">
+										<h:outputText value="#{rst.vlrQuilo}" converter="converterMoeda"/>
 									</rich:column>
 								</rich:dataTable>
 							</div>

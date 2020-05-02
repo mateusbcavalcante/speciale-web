@@ -6,8 +6,11 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
@@ -25,10 +28,12 @@ import br.com.a2dm.spdm.config.MenuControl;
 import br.com.a2dm.spdm.entity.Cliente;
 import br.com.a2dm.spdm.entity.ClienteProduto;
 import br.com.a2dm.spdm.entity.FormaPagamento;
+import br.com.a2dm.spdm.entity.Pedido;
 import br.com.a2dm.spdm.entity.Produto;
 import br.com.a2dm.spdm.entity.Tipo;
 import br.com.a2dm.spdm.service.ClienteService;
 import br.com.a2dm.spdm.service.FormaPagamentoService;
+import br.com.a2dm.spdm.service.PedidoService;
 import br.com.a2dm.spdm.service.ProdutoService;
 import br.com.a2dm.spdm.service.TipoService;
 
@@ -269,6 +274,8 @@ public class ClienteBean extends AbstractBean<Cliente, ClienteService>
 					FacesMessage message = new FacesMessage("Registro inativado com sucesso!");
 					message.setSeverity(FacesMessage.SEVERITY_INFO);
 					FacesContext.getCurrentInstance().addMessage(null, message);
+					
+					this.setSearchResult(ClienteService.getInstancia().pesquisar(new Cliente(), getJoinPesquisar()));
 				}
 			}
 		}
@@ -279,7 +286,7 @@ public class ClienteBean extends AbstractBean<Cliente, ClienteService>
 	        FacesContext.getCurrentInstance().addMessage(null, message);
 		}		
 	}
-
+	
 	@Override
 	@SuppressWarnings("unchecked")
 	protected void completarAlterar() throws Exception 
@@ -357,6 +364,8 @@ public class ClienteBean extends AbstractBean<Cliente, ClienteService>
 					FacesMessage message = new FacesMessage("Registro ativado com sucesso!");
 					message.setSeverity(FacesMessage.SEVERITY_INFO);
 					FacesContext.getCurrentInstance().addMessage(null, message);
+					
+					this.setSearchResult(ClienteService.getInstancia().pesquisar(new Cliente(), getJoinPesquisar()));
 				}
 			}
 		}
