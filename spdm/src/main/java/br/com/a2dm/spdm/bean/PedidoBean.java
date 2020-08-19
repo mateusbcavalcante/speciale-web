@@ -2,11 +2,14 @@ package br.com.a2dm.spdm.bean;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
@@ -20,13 +23,16 @@ import br.com.a2dm.brcmn.util.jsf.JSFUtil;
 import br.com.a2dm.brcmn.util.jsf.Variaveis;
 import br.com.a2dm.brcmn.util.validacoes.ValidaPermissao;
 import br.com.a2dm.spdm.config.MenuControl;
+import br.com.a2dm.spdm.entity.Cliente;
+import br.com.a2dm.spdm.entity.OpcaoEntrega;
 import br.com.a2dm.spdm.entity.Pedido;
 import br.com.a2dm.spdm.entity.PedidoProduto;
 import br.com.a2dm.spdm.entity.Produto;
+import br.com.a2dm.spdm.service.ClienteService;
+import br.com.a2dm.spdm.service.OpcaoEntregaService;
 import br.com.a2dm.spdm.service.PedidoProdutoService;
 import br.com.a2dm.spdm.service.PedidoService;
 import br.com.a2dm.spdm.service.ProdutoService;
-
 
 @RequestScoped
 @ManagedBean
@@ -44,6 +50,8 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 	private String stringDataEntrega;
 	private List<Produto> listaProduto;
 	private List<Produto> listaProdutoResult;
+	private List<OpcaoEntrega> listaOpcaoEntrega;
+	private OpcaoEntrega opcaoEntrega;
 	
 	private final String LISTA_PRODUTOS_SESSAO = "produtos";
 	
@@ -64,6 +72,7 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 	@Override
 	protected void setValoresDefault() throws Exception
 	{
+		this.setPedido(new Pedido());
 		this.getSearchObject().setDatPedido(new Date());
 		this.atualizarStringData(this.getSearchObject().getDatPedido());
 	}
@@ -92,6 +101,13 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 		
 		List<Produto> lista = ProdutoService.getInstancia().pesquisar(produto, ProdutoService.JOIN_CLIENTE_PRODUTO);
 		this.getListaProduto().addAll(lista);
+		
+		this.iniciaListaOpcaoEntrega();
+		
+		OpcaoEntrega opcaoEntrega = new OpcaoEntrega();
+		opcaoEntrega.setFlgAtivo("S");
+		List<OpcaoEntrega> listaOpcaoEntrega = OpcaoEntregaService.getInstancia().pesquisar(opcaoEntrega, 0);
+		this.getListaOpcaoEntrega().addAll(listaOpcaoEntrega);
 	}
 	
 	@Override
@@ -124,8 +140,16 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 				
 				pedido = PedidoService.getInstancia().get(pedido, PedidoService.JOIN_USUARIO_CAD
 																| PedidoService.JOIN_PEDIDO_PRODUTO
+																| PedidoService.JOIN_PEDIDO_OPCAO_ENTREGA
 																| PedidoService.JOIN_PEDIDO_PRODUTO_PRODUTO
 																| PedidoService.JOIN_CLIENTE);
+				
+				if (pedido.getVlrFrete() != null && pedido.getVlrFrete().intValue() > 0) {
+					pedido.setVlrFreteFormatado(new DecimalFormat("#,##0.00", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(pedido.getVlrFrete()));
+				} else {
+					pedido.setVlrFreteFormatado(new DecimalFormat("#,##0.00", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(0.00));
+				}
+				
 				this.setPedido(pedido);
 				completarPosPesquisar();
 				setCurrentState(STATE_SEARCH);
@@ -135,7 +159,7 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 		{
 			FacesMessage message = new FacesMessage(e.getMessage());
 			message.setSeverity(FacesMessage.SEVERITY_ERROR);
-			if(e.getMessage() == null)
+			if(e.getMessage() == null)	
 				FacesContext.getCurrentInstance().addMessage("", message);
 			else
 				FacesContext.getCurrentInstance().addMessage(null, message);
@@ -152,6 +176,12 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 		{
 			throw new Exception("O campo Data da Produção é obrigatório!");
 		}
+		
+		if (this.getEntity().getIdOpcaoEntrega() == null
+				|| this.getEntity().getIdOpcaoEntrega().intValue() <= 0) 
+		{
+			throw new Exception("O campo Opção de Entrega é obrigatório!");
+		} 
 		
 		if(this.getListaProdutoResult() == null
 				|| this.getListaProdutoResult().size() <= 0)
@@ -179,11 +209,13 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 		
 		int dia = calendar.get(Calendar.DAY_OF_WEEK);
 		
-		if (dia == Calendar.SUNDAY) 
+		if (!isClienteEvento() && dia == Calendar.SUNDAY) 
 		{
 			throw new Exception("Não é possível realizar pedido para o dia de Domingo!");
 		}
-				
+		
+		BigInteger qtdTotalSolicitada = BigInteger.ZERO;
+		
 		for (Produto produto : this.getListaProdutoResult())
 		{
 			if(produto.getQtdSolicitada() == null
@@ -192,16 +224,35 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 				throw new Exception("A Quantidade do produto " + produto.getDesProduto() + " não foi preenchida!");
 			}
 			
-			if(produto.getQtdLoteMinimo().intValue() > produto.getQtdSolicitada().intValue())
-			{
-				throw new Exception("O Lote Mínimo do produto " + produto.getDesProduto() + " não foi atingida! Quantidade de Lote Mínimo: " + produto.getQtdLoteMinimo());
+			if (!isClienteEvento()) {
+				if(produto.getQtdLoteMinimo().intValue() > produto.getQtdSolicitada().intValue())
+				{
+					throw new Exception("O Lote Mínimo do produto " + produto.getDesProduto() + " não foi atingida! Quantidade de Lote Mínimo: " + produto.getQtdLoteMinimo());
+				}
+				
+				if(produto.getQtdSolicitada().intValue() % produto.getQtdMultiplo().intValue() != 0)
+				{
+					throw new Exception("A Quantidade do produto " + produto.getDesProduto() + " deve ser solicitada em múltiplo de "+ produto.getQtdMultiplo() +"!");
+				}
 			}
-			
-			if(produto.getQtdSolicitada().intValue() % produto.getQtdMultiplo().intValue() != 0)
-			{
-				throw new Exception("A Quantidade do produto " + produto.getDesProduto() + " deve ser solicitada em múltiplo de "+ produto.getQtdMultiplo() +"!");
-			}
+			qtdTotalSolicitada = qtdTotalSolicitada.add(produto.getQtdSolicitada());
 		}
+		
+		if (!isClienteEvento() && qtdTotalSolicitada.intValue() < 60) {
+			throw new Exception("É necessário solicitar, no mínimo, 60 pães!");
+		}
+	}
+
+	private boolean isClienteEvento() throws Exception {
+		Cliente cliente = new Cliente();
+		cliente.setIdCliente(util.getUsuarioLogado().getIdCliente());
+		
+		cliente = ClienteService.getInstancia().get(cliente, 0);
+		
+		if (cliente != null) {
+			return cliente.getFlgEvento() != null && !cliente.getFlgEvento().equalsIgnoreCase("") && cliente.getFlgEvento().equalsIgnoreCase("S");
+		}
+		return false;
 	}
 	
 	public void preparaAlterar()
@@ -213,6 +264,13 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 				util.getSession().removeAttribute(LISTA_PRODUTOS_SESSAO);
 				
 				this.getEntity().setObsPedido(this.getPedido().getObsPedido());
+				this.getEntity().setIdOpcaoEntrega(this.getPedido().getIdOpcaoEntrega());
+				
+				if (this.getPedido().getVlrFrete() != null && this.getPedido().getVlrFrete().intValue() > 0) {
+					this.getEntity().setVlrFreteFormatado(new DecimalFormat("#,##0.00", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(pedido.getVlrFrete()));
+				} else {
+					this.getEntity().setVlrFreteFormatado(new DecimalFormat("#,##0.00", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(0.00));
+				}
 				
 				this.setTpPesquisaProduto(1);
 				this.setProduto(new Produto());
@@ -235,7 +293,19 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 					listaProdutoSessao.add(obj.getProduto());
 				}
 				
+				if (this.getEntity().getOpcaoEntrega() == null) {
+					this.getEntity().setOpcaoEntrega(new OpcaoEntrega());
+				}
+				
 				util.getSession().setAttribute(LISTA_PRODUTOS_SESSAO, listaProdutoSessao);
+				
+				// SETANDO LISTA DE OPCAO DE ENTREGA
+				OpcaoEntrega opcaoEntrega = new OpcaoEntrega();
+				opcaoEntrega.setFlgAtivo("S");
+				
+				List<OpcaoEntrega> listaOpcaoEntrega = OpcaoEntregaService.getInstancia().pesquisar(opcaoEntrega, 0);
+				this.iniciaListaOpcaoEntrega();
+				this.getListaOpcaoEntrega().addAll(listaOpcaoEntrega);
 				
 				setCurrentState(STATE_EDIT);
 				setListaAlterar();
@@ -252,14 +322,29 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 		}
 	}
 	
+	private void iniciaListaOpcaoEntrega()
+	{
+		ArrayList<OpcaoEntrega> lista = new ArrayList<>();
+		OpcaoEntrega opcaoEntrega = new OpcaoEntrega();
+		opcaoEntrega.setIdOpcaoEntrega(null);
+		opcaoEntrega.setDesOpcaoEntrega("Escolha a Opção de Entrega");		
+		lista.add(opcaoEntrega);
+		
+		this.setListaOpcaoEntrega(lista);
+	}
+	
 	@Override
 	@SuppressWarnings("unchecked")
 	protected void completarAlterar() throws Exception 
 	{
 		String obs = this.getEntity().getObsPedido();
+		BigInteger idOpcaoEntrega = this.getEntity().getIdOpcaoEntrega();
+		String vlrFreteFormatado = this.getEntity().getVlrFreteFormatado();
 		
 		this.setEntity(pedido);
 		this.getEntity().setObsPedido(obs);
+		this.getEntity().setIdOpcaoEntrega(idOpcaoEntrega);
+		this.getEntity().setVlrFreteFormatado(vlrFreteFormatado);
 		this.validarInserir();
 		this.getEntity().setDatAlteracao(new Date());
 		this.getEntity().setIdUsuarioAlt(util.getUsuarioLogado().getIdUsuario());
@@ -389,7 +474,7 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 	    	  {
 	    		  validarInserir();
 	    		  completarInserir();
-	    		  setEntity(PedidoService.getInstancia().inserir(getEntity()));
+	    		  PedidoService.getInstancia().inserir(getEntity());
 	    		  FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Registro inserido com sucesso. Protocolo do Pedido: "+ getEntity().getIdPedido(), null));
 	    		  
 	    		  this.cancelar(event);
@@ -630,10 +715,15 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 			Produto produto = new Produto();
 			produto.setIdProduto(this.getProduto().getIdProduto());
 			produtoSelecionado = ProdutoService.getInstancia().get(produto, 0);
-//			this.setQtdSolicitada(produtoSelecionado.getQtdLoteMinimo());
 		} else {
 			setProdutoSelecionado(null);
 		}
+	}
+	
+	public void buscarInformacoesOpcaoEntrega() throws Exception
+	{
+		String vlrFreteFormatado = PedidoService.getInstancia().buscarInformacoesOpcaoEntrega(util.getUsuarioLogado().getIdCliente(), this.getEntity().getIdOpcaoEntrega());
+		this.getEntity().setVlrFreteFormatado(vlrFreteFormatado);
 	}
 	
 	@Override
@@ -780,4 +870,21 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 	public void setStringDataEntrega(String stringDataEntrega) {
 		this.stringDataEntrega = stringDataEntrega;
 	}
+
+	public List<OpcaoEntrega> getListaOpcaoEntrega() {
+		return listaOpcaoEntrega;
+	}
+
+	public void setListaOpcaoEntrega(List<OpcaoEntrega> listaOpcaoEntrega) {
+		this.listaOpcaoEntrega = listaOpcaoEntrega;
+	}
+
+	public OpcaoEntrega getOpcaoEntrega() {
+		return opcaoEntrega;
+	}
+
+	public void setOpcaoEntrega(OpcaoEntrega opcaoEntrega) {
+		this.opcaoEntrega = opcaoEntrega;
+	}
+	
 }

@@ -54,6 +54,7 @@
 		<mapping class="br.com.a2dm.spdm.entity.ObservacaoLogistica"/>
 		<mapping class="br.com.a2dm.spdm.entity.ObservacaoProducao"/>
 		<mapping class="br.com.a2dm.spdm.entity.FormaPagamento"/>
+		<mapping class="br.com.a2dm.spdm.entity.OpcaoEntrega"/>
 		<mapping class="br.com.a2dm.spdm.entity.Tipo"/>
 		
 	</session-factory>

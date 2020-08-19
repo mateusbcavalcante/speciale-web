@@ -22,7 +22,10 @@
 		<t:saveState value="#{crudBean.produto}" />
 		<t:saveState value="#{crudBean.pedido}" />
 		<t:saveState value="#{crudBean.listaProduto}" />
+		<t:saveState value="#{crudBean.listaOpcaoEntrega}" />
 		<t:saveState value="#{crudBean.listaProdutoResult}" />
+		<t:saveState value="#{crudBean.stringData}" />
+		<t:saveState value="#{crudBean.stringDataEntrega}" />
 	</ui:define>
 	
 	<ui:define name="content">
@@ -68,8 +71,8 @@
 		                  <label for="inputEmail3" class="col-sm-2 control-label">Data da Produção *</label>
 		                  <div class="col-sm-2" style="width: 13% !important; padding-right: 30px;">
 			               	  <rich:calendar value="#{crudBean.entity.datPedido}" buttonClass="glyphicon glyphicon-calendar" inputSize="9" buttonIcon="../images/calendar.png"  datePattern="dd/MM/yyyy" inputClass="form-control" showWeeksBar="false" enableManualInput="true" oninputkeypress="return formataData(event,this);" maxlength="10">
-			               	  	<a4j:ajax event="change" listener="#{crudBean.atualizarStringDataInsert}" render="panelGroupDeInserir"/>
-		                	  	<a4j:ajax event="inputchange" listener="#{crudBean.atualizarStringDataInsert}" render="panelGroupDeInserir"/>
+			               	  	<a4j:ajax event="change" listener="#{crudBean.atualizarStringDataInsert}" render="panelEntrega"/>
+		                	  	<a4j:ajax event="inputchange" listener="#{crudBean.atualizarStringDataInsert}" render="panelEntrega"/>
 			               	  </rich:calendar>
 		                  </div>
 		               	  <label for="inputEmail3" class="col-sm-2 control-label" style="text-align: left; color: #800000">
@@ -77,12 +80,14 @@
 		                  </label>
 		               	</div>
 		               	
-		               	<div class="form-group">
-		                  <label for="inputEmail3" class="col-sm-2 control-label">Entrega</label>
-		               	  <label for="inputEmail3" class="col-sm-2 control-label" style="text-align: left; color: #800000">
-		                   	<h:outputText value="#{crudBean.stringDataEntrega}"/>
-		                  </label>
-		               	</div>
+		               	<h:panelGroup layout="block" id="panelEntrega">
+			               	<div class="form-group">
+			                  <label for="inputEmail3" class="col-sm-2 control-label">Entrega</label>
+			               	  <label for="inputEmail3" class="col-sm-2 control-label" style="text-align: left; color: #800000">
+			                   	<h:outputText value="#{crudBean.stringDataEntrega}"/>
+			                  </label>
+			               	</div>
+		               	</h:panelGroup>
 	               	</h:panelGroup>
 	               	
 	               	<h:panelGroup id="panelGroupDeAlterar" rendered="#{crudBean.editing}">
@@ -122,6 +127,25 @@
 				            </div>
 				        </div>
 	               	</h:panelGroup>
+	               	
+	               	<div class="form-group">
+                   	   <label class="col-sm-2 control-label">Opção de Entrega *</label>
+	                   <div class="col-sm-2">
+	                   	  <h:selectOneMenu id="compOpcaoEntrega" value="#{crudBean.entity.idOpcaoEntrega}" converter="simpleIndexConverter" styleClass="form-control" style="width:250px; display: initial;">								
+							<t:selectItems var="o" itemValue="#{o.idOpcaoEntrega}" itemLabel="#{o.desOpcaoEntrega}" value="#{crudBean.listaOpcaoEntrega}" />
+							<f:ajax listener="#{crudBean.buscarInformacoesOpcaoEntrega}" render="panelValorFrete"/>
+						  </h:selectOneMenu>
+	                   </div>
+                 	</div>
+                 	
+                 	<h:panelGroup layout="block" id="panelValorFrete">
+	                 	<div class="form-group">
+	                 		<label for="inputEmail3" class="col-sm-2 control-label">Valor do Frete</label>
+		                    <label for="inputEmail3" class="col-sm-2 control-label" style="text-align: left; color: #800000">
+			                   	<h:outputText value="#{crudBean.entity.vlrFreteFormatado}"/>
+			                </label>
+		               	</div>
+	                </h:panelGroup>
 	               	
 	               	<div class="form-group">
 	                	<label for="inputEmail3" class="col-sm-2 control-label">Observação</label>
@@ -226,7 +250,7 @@
 		                </h:panelGroup>
 		                
 		                <h:panelGroup layout="block" rendered="#{empty crudBean.listaProdutoResult}">
-							Nao existem produtos adicionados no pedido
+							Não existe produto adicionado no pedido
 						</h:panelGroup>
 					</rich:panel>
                	</div>
@@ -277,6 +301,24 @@
 				            	<div class="radio">
 									<h:outputText value="Ativo" rendered="#{crudBean.pedido.flgAtivo == 'S'}"/>
 									<h:outputText value="Inativo" rendered="#{crudBean.pedido.flgAtivo == 'N'}"/>
+								</div>
+				            </div>
+				        </div>
+				        
+				        <div class="form-group">
+				        	<label for="inputEmail3" class="col-sm-2 control-label">Opção de Entrega: </label>
+				        	<div class="col-sm-10">
+				            	<div class="radio">
+									<h:outputText value="#{crudBean.pedido.opcaoEntrega.desOpcaoEntrega}"/>
+								</div>
+				            </div>
+				        </div>
+				        
+				        <div class="form-group">
+				        	<label for="inputEmail3" class="col-sm-2 control-label">Valor do Frete: </label>
+				        	<div class="col-sm-10">
+				            	<div class="radio">
+									<h:outputText value="#{crudBean.pedido.vlrFreteFormatado}"/>
 								</div>
 				            </div>
 				        </div>
