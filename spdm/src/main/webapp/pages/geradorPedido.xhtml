@@ -21,6 +21,7 @@
 		<t:saveState value="#{crudBean.listaPedidoResult}" />
 		<t:saveState value="#{crudBean.produto}" />
 		<t:saveState value="#{crudBean.produtoSelecionado}" />
+		<t:saveState value="#{crudBean.listaOpcaoEntrega}" />
 	</ui:define>
 	
 	<ui:define name="content">
@@ -145,10 +146,10 @@
 										  rendered="#{not empty crudBean.listaPedidoResult}">						     
 									<f:facet name="header">
 										<rich:columnGroup>
-											<rich:column style="width: 15%; text-align: center;">
+											<rich:column style="width: 10%; text-align: center;">
 												Data da Produção
 											</rich:column>
-											<rich:column style="width: 32%; text-align: center;">
+											<rich:column style="width: 27%; text-align: center;">
 												Cliente
 											</rich:column>
 											<rich:column style="width: 45%; text-align: center;">
@@ -156,6 +157,9 @@
 											</rich:column>
 											<rich:column style="width: 5%; text-align: center;">
 												Observação
+											</rich:column>
+											<rich:column style="width: 5%; text-align: center;">
+												Opção Entrega
 											</rich:column>
 											<rich:column style="width: 3%; text-align: center;" />
 										</rich:columnGroup>
@@ -203,6 +207,14 @@
 										<h:inputTextarea cols="30" rows="4" id="obsPedido" onkeyup="verificaTamanho(this, 400, 'lblObsPedido');" value="#{rst.obsPedido}" /> 
 									</rich:column>
 									
+									<rich:column style="text-align: left;">
+					                   <div class="col-sm-2">
+					                   	  <h:selectOneMenu id="compOpcaoEntrega" value="#{rst.idOpcaoEntrega}" converter="simpleIndexConverter" styleClass="form-control" style="width:250px; display: initial;">								
+											<t:selectItems var="o" itemValue="#{o.idOpcaoEntrega}" itemLabel="#{o.desOpcaoEntrega}" value="#{crudBean.listaOpcaoEntrega}" />
+										  </h:selectOneMenu>
+					                   </div>
+				                 	</rich:column>
+				                 	
 									<rich:column style="text-align: center; vertical-align: middle;">
 										<a4j:commandButton image="../images/inativar.png" style="border:none; width: 18px; height: 18px;" title="EXCLUIR" action="#{crudBean.removerPedido}" render="panelProdutoResult">
 											<f:setPropertyActionListener target="#{crudBean.idClienteRemover}" value="#{rst.cliente.idCliente}" />

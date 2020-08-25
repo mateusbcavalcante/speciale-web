@@ -1,11 +1,14 @@
 package br.com.a2dm.spdm.bean;
 
 import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
@@ -18,10 +21,12 @@ import br.com.a2dm.brcmn.util.jsf.JSFUtil;
 import br.com.a2dm.brcmn.util.jsf.Variaveis;
 import br.com.a2dm.spdm.config.MenuControl;
 import br.com.a2dm.spdm.entity.Cliente;
+import br.com.a2dm.spdm.entity.OpcaoEntrega;
 import br.com.a2dm.spdm.entity.Pedido;
 import br.com.a2dm.spdm.entity.PedidoProduto;
 import br.com.a2dm.spdm.entity.Produto;
 import br.com.a2dm.spdm.service.ClienteService;
+import br.com.a2dm.spdm.service.OpcaoEntregaService;
 import br.com.a2dm.spdm.service.PedidoProdutoService;
 import br.com.a2dm.spdm.service.PedidoService;
 import br.com.a2dm.spdm.service.ProdutoService;
@@ -38,6 +43,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 	private List<Produto> listaProduto;
 	private Pedido pedido;
 	private List<Pedido> listaPedidoResult;
+	private List<OpcaoEntrega> listaOpcaoEntrega;
 	
 	private JSFUtil util = new JSFUtil();
 	private BigInteger qtdSolicitada;
@@ -101,6 +107,23 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 	{		
 		this.setListaPedidoResult(new ArrayList<Pedido>());
 		this.setProduto(new Produto());
+		this.iniciaListaOpcaoEntrega();
+		
+		OpcaoEntrega opcaoEntrega = new OpcaoEntrega();
+		opcaoEntrega.setFlgAtivo("S");
+		List<OpcaoEntrega> listaOpcaoEntrega = OpcaoEntregaService.getInstancia().pesquisar(opcaoEntrega, 0);
+		this.getListaOpcaoEntrega().addAll(listaOpcaoEntrega);
+	}
+	
+	private void iniciaListaOpcaoEntrega()
+	{
+		ArrayList<OpcaoEntrega> lista = new ArrayList<>();
+		OpcaoEntrega opcaoEntrega = new OpcaoEntrega();
+		opcaoEntrega.setIdOpcaoEntrega(null);
+		opcaoEntrega.setDesOpcaoEntrega("Escolha a Opção de Entrega");		
+		lista.add(opcaoEntrega);
+		
+		this.setListaOpcaoEntrega(lista);
 	}
 	
 	public void buscarProdutos() throws Exception {
@@ -173,6 +196,13 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 					pedido.setIdPedido(listaPedidoProduto.get(0).getPedido().getIdPedido());
 					pedido.setObsPedido(listaPedidoProduto.get(0).getPedido().getObsPedido());
 					pedido.setDatPedido(listaPedidoProduto.get(0).getPedido().getDatPedido());
+					pedido.setIdOpcaoEntrega(listaPedidoProduto.get(0).getPedido().getIdOpcaoEntrega());
+					
+					if (listaPedidoProduto.get(0).getPedido().getVlrFrete() != null && listaPedidoProduto.get(0).getPedido().getVlrFrete().intValue() > 0) {
+						pedido.setVlrFreteFormatado(new DecimalFormat("#,##0.00", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(listaPedidoProduto.get(0).getPedido().getVlrFrete()));
+					} else {
+						pedido.setVlrFreteFormatado(new DecimalFormat("#,##0.00", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(0.00));
+					}
 					
 					Cliente cliente = new Cliente();
 					cliente.setIdCliente(this.getIdClienteSelecionado());
@@ -199,6 +229,14 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 				buscarProdutos();
 				setCurrentState(STATE_EDIT);
 				setListaAlterar();
+				
+				// SETANDO LISTA DE OPCAO DE ENTREGA
+				OpcaoEntrega opcaoEntrega = new OpcaoEntrega();
+				opcaoEntrega.setFlgAtivo("S");
+				
+				List<OpcaoEntrega> listaOpcaoEntrega = OpcaoEntregaService.getInstancia().pesquisar(opcaoEntrega, 0);
+				this.iniciaListaOpcaoEntrega();
+				this.getListaOpcaoEntrega().addAll(listaOpcaoEntrega);
 			}
 		}
 		catch (Exception e)
@@ -406,7 +444,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
       {
     	  if(validarAcesso(Variaveis.ACAO_ALTERAR))
     	  {
-    		  validarInserir();
+//    		  validarInserir();
     		  PedidoService.getInstancia().alterarGeradorPedido(getListaPedidoResult());
     		  FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Registro alterado com sucesso", null));
     		  
@@ -423,6 +461,12 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
         	 FacesContext.getCurrentInstance().addMessage(null, message);
       }
     }
+	
+	public void buscarInformacoesOpcaoEntrega(Pedido pedido) throws Exception
+	{
+		String vlrFreteFormatado = PedidoService.getInstancia().buscarInformacoesOpcaoEntrega(pedido.getCliente().getIdCliente(), pedido.getIdOpcaoEntrega());
+		pedido.setVlrFreteFormatado(vlrFreteFormatado);
+	}
 	
 	public void inserir(ActionEvent event) 
     {
@@ -619,5 +663,13 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 
 	public void setDesClienteSelecionado(String desClienteSelecionado) {
 		this.desClienteSelecionado = desClienteSelecionado;
+	}
+
+	public List<OpcaoEntrega> getListaOpcaoEntrega() {
+		return listaOpcaoEntrega;
+	}
+
+	public void setListaOpcaoEntrega(List<OpcaoEntrega> listaOpcaoEntrega) {
+		this.listaOpcaoEntrega = listaOpcaoEntrega;
 	}
 }

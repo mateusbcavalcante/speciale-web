@@ -127,6 +127,34 @@
 		                 	</div>
 		                </div>
 		                
+		                <div class="form-group">
+	                      <label for="inputEmail3" class="col-sm-2 control-label">Evento</label>
+	                      <div class="col-sm-6">
+	                        <div style="width: 300px;" class="radio">
+								<h:selectOneRadio value="#{crudBean.entity.flgEvento}" style="width: 100%;" >
+									<f:selectItem itemValue="S" itemLabel="Sim" />
+									<f:selectItem itemValue="N" itemLabel="Não"/>
+								</h:selectOneRadio>
+							</div>
+	                        <span style="color: #f68432">["SIM": Não entrará nas validações do pedido]</span><br/>
+	                        <span style="color: #f68432">["NÃO": Será validado normalmente]</span>
+	                      </div>
+	                    </div>
+		                
+		                <div class="form-group">
+	                      <label for="inputEmail3" class="col-sm-2 control-label">Master</label>
+	                      <div class="col-sm-6">
+	                        <div style="width: 300px;" class="radio">
+								<h:selectOneRadio value="#{crudBean.entity.flgMaster}" style="width: 100%;" >
+									<f:selectItem itemValue="S" itemLabel="Sim" />
+									<f:selectItem itemValue="N" itemLabel="Não"/>
+								</h:selectOneRadio>
+							</div>
+	                      	<span style="color: #f68432">["SIM": Poderá solicitar qualquer quantidade de pães]</span><br/>
+	                      	<span style="color: #f68432">["NÃO": Terá que solicitar, no mínimo, 60 pães]</span>
+	                      </div>
+	                    </div>
+		                
 	                </rich:tab>
 	                
 	                <rich:tab header="Produtos">
@@ -250,7 +278,13 @@
 								</rich:column>
 								<rich:column style="width: 10%; text-align: center;">
 									Tipo
-								</rich:column>								
+								</rich:column>
+								<rich:column style="width: 9%; text-align: center;">
+									Evento
+								</rich:column>
+								<rich:column style="width: 9%; text-align: center;">
+									Master
+								</rich:column>							
 								<rich:column style="width: 9%; text-align: center;">
 									Situação
 								</rich:column>
@@ -282,7 +316,15 @@
 						<rich:column style="text-align: left;">
 							<h:outputText value="#{rst.tipo.desTipo}"/>
 						</rich:column>
-						<rich:column style="text-align: left;">
+						<rich:column style="text-align: center;">
+							<h:outputText value="Sim" style="color: blue;" rendered="#{rst.flgEvento == 'S'}"/>
+							<h:outputText value="Não" style="color:red;" rendered="#{rst.flgEvento == 'N'}"/>
+						</rich:column>
+						<rich:column style="text-align: center;">
+							<h:outputText value="Sim" style="color: blue;" rendered="#{rst.flgMaster == 'S'}"/>
+							<h:outputText value="Não" style="color:red;" rendered="#{rst.flgMaster == 'N'}"/>
+						</rich:column>
+						<rich:column style="text-align: center;">
 							<h:outputText value="ATIVO" style="color: blue;" rendered="#{rst.flgAtivo == 'S'}"/>
 							<h:outputText value="INATIVO" style="color:red;" rendered="#{rst.flgAtivo == 'N'}"/>
 						</rich:column>

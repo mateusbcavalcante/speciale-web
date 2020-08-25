@@ -345,7 +345,7 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 		this.getEntity().setObsPedido(obs);
 		this.getEntity().setIdOpcaoEntrega(idOpcaoEntrega);
 		this.getEntity().setVlrFreteFormatado(vlrFreteFormatado);
-		this.validarInserir();
+//		this.validarInserir();
 		this.getEntity().setDatAlteracao(new Date());
 		this.getEntity().setIdUsuarioAlt(util.getUsuarioLogado().getIdUsuario());
 		this.getEntity().setPlataforma(PedidoService.PLATAFORMA_WEB);
@@ -472,7 +472,7 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 	      {
 	    	  if(validarAcesso(Variaveis.ACAO_INSERIR))
 	    	  {
-	    		  validarInserir();
+//	    		  validarInserir();
 	    		  completarInserir();
 	    		  PedidoService.getInstancia().inserir(getEntity());
 	    		  FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Registro inserido com sucesso. Protocolo do Pedido: "+ getEntity().getIdPedido(), null));
