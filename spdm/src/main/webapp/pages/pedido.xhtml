@@ -63,9 +63,12 @@
 		</h:panelGroup>	
 		
 		<h:panelGroup id="panelGroupDeEdicao" style="height:100%;width:100%;" rendered="#{crudBean.updating}">
-			<f:subview id="viewEdicao">			
+			<f:subview id="viewEdicao">
 				<div class="box-body">
+					<h:outputText value="Se a opção escolhida for 'Entrega', pode conter taxa de entrega." style="color: #9e5d28"></h:outputText>
+				</div>
 				
+				<div class="box-body">
 					<h:panelGroup id="panelGroupDeInserir" rendered="#{crudBean.inserting}">
 						<div class="form-group">
 		                  <label for="inputEmail3" class="col-sm-2 control-label">Data da Produção *</label>
@@ -129,23 +132,14 @@
 	               	</h:panelGroup>
 	               	
 	               	<div class="form-group">
-                   	   <label class="col-sm-2 control-label">Opção de Entrega *</label>
+                   	   <label class="col-sm-2 control-label">Opção *</label>
 	                   <div class="col-sm-2">
 	                   	  <h:selectOneMenu id="compOpcaoEntrega" value="#{crudBean.entity.idOpcaoEntrega}" converter="simpleIndexConverter" styleClass="form-control" style="width:250px; display: initial;">								
 							<t:selectItems var="o" itemValue="#{o.idOpcaoEntrega}" itemLabel="#{o.desOpcaoEntrega}" value="#{crudBean.listaOpcaoEntrega}" />
-							<f:ajax listener="#{crudBean.buscarInformacoesOpcaoEntrega}" render="panelValorFrete"/>
+							<f:ajax listener="#{crudBean.buscarInformacoesOpcaoEntrega}"/>
 						  </h:selectOneMenu>
 	                   </div>
                  	</div>
-                 	
-                 	<h:panelGroup layout="block" id="panelValorFrete">
-	                 	<div class="form-group">
-	                 		<label for="inputEmail3" class="col-sm-2 control-label">Valor do Frete</label>
-		                    <label for="inputEmail3" class="col-sm-2 control-label" style="text-align: left; color: #800000">
-			                   	<h:outputText value="#{crudBean.entity.vlrFreteFormatado}"/>
-			                </label>
-		               	</div>
-	                </h:panelGroup>
 	               	
 	               	<div class="form-group">
 	                	<label for="inputEmail3" class="col-sm-2 control-label">Observação</label>
@@ -310,15 +304,6 @@
 				        	<div class="col-sm-10">
 				            	<div class="radio">
 									<h:outputText value="#{crudBean.pedido.opcaoEntrega.desOpcaoEntrega}"/>
-								</div>
-				            </div>
-				        </div>
-				        
-				        <div class="form-group">
-				        	<label for="inputEmail3" class="col-sm-2 control-label">Valor do Frete: </label>
-				        	<div class="col-sm-10">
-				            	<div class="radio">
-									<h:outputText value="#{crudBean.pedido.vlrFreteFormatado}"/>
 								</div>
 				            </div>
 				        </div>
