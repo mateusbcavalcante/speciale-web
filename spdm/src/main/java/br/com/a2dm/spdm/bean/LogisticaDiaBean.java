@@ -24,10 +24,12 @@ import br.com.a2dm.brcmn.util.validacoes.ValidaPermissao;
 import br.com.a2dm.spdm.config.MenuControl;
 import br.com.a2dm.spdm.entity.Cliente;
 import br.com.a2dm.spdm.entity.ObservacaoLogistica;
+import br.com.a2dm.spdm.entity.OpcaoEntrega;
 import br.com.a2dm.spdm.entity.Pedido;
 import br.com.a2dm.spdm.entity.PedidoProduto;
 import br.com.a2dm.spdm.service.ClienteService;
 import br.com.a2dm.spdm.service.ObservacaoLogisticaService;
+import br.com.a2dm.spdm.service.OpcaoEntregaService;
 import br.com.a2dm.spdm.service.PedidoService;
 import br.com.a2dm.spdm.service.ReceitaService;
 
@@ -122,8 +124,15 @@ public class LogisticaDiaBean extends AbstractBean<Pedido, PedidoService>
 				{
 					listaClientes.add(pedido.getCliente().getIdCliente());
 					
+					if (pedido.getIdOpcaoEntrega() != null
+							&& pedido.getIdOpcaoEntrega().intValue() > 0) 
+					{
+						pedido.getCliente().setDesCliente("[" + pedido.getOpcaoEntrega().getDesOpcaoEntrega().toUpperCase() + "] " + pedido.getCliente().getDesCliente());
+					}
+					
 					for (PedidoProduto pedidoProduto : pedido.getListaPedidoProduto())
 					{
+						
 						pedidoProduto.getPedido().setCliente(new Cliente());
 						pedidoProduto.getPedido().getCliente().setDesCliente(pedido.getCliente().getDesCliente());
 						

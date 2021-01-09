@@ -425,6 +425,11 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 		}
 		
 		for (Pedido element : getListaPedidoResult()) {
+			if (element.getIdOpcaoEntrega() == null)
+			{
+				throw new Exception("No pedido do cliente " + element.getCliente().getDesCliente() + ", o campo Opção é obrigatório!");
+			}
+			
 			if (element.getDatPedido() == null
 					|| element.getDatPedido().toString().trim().equals(""))
 			{
