@@ -36,15 +36,6 @@
 		               </div>
 		             </div>
 					</div>
-						
-					<div class="box-body">
-		             <div class="form-group">
-		               <label for="inputEmail3" class="col-sm-3 control-label">Hora Limite:</label>
-		               <div class="col-sm-6" style="padding-top: 7px;">               	 
-		                 <h:outputText value="#{crudBean.entity.horLimite}"/>
-		               </div>
-		             </div>
-					</div>
 								
 					<div class="box-body">
 		             <div class="form-group">
@@ -52,16 +43,6 @@
 		               <div class="col-sm-6" style="padding-top: 7px;">
 		               	 <h:outputText value="ATIVO" style="color: blue;" rendered="#{crudBean.entity.flgAtivo == 'S'}"/>
 						 <h:outputText value="INATIVO" style="color:red;" rendered="#{crudBean.entity.flgAtivo == 'N'}"/>
-		               </div>
-		             </div>
-					</div>
-					
-					<div class="box-body">
-		             <div class="form-group">
-		               <label for="inputEmail3" class="col-sm-3 control-label">Prioridade:</label>
-		               <div class="col-sm-6" style="padding-top: 7px;">
-		               	 <h:outputText value="#{crudBean.entity.numPrioridade}" rendered="#{crudBean.entity.numPrioridade != null}"/>
-		               	 <h:outputText value=" - " rendered="#{crudBean.entity.numPrioridade == null}"/>
 		               </div>
 		             </div>
 					</div>
@@ -102,71 +83,10 @@
 		             </div>
 					</div>
 				</rich:tab>
-				
-				<rich:tab header="Produtos">
-					<div class="box-content">
-								<rich:dataTable id="tblDataProdutoCliente" 
-											 value="#{crudBean.entity.listaClienteProduto}" 
-										       var="rst"
-										styleClass="table table-bordered table-striped dataTable"
-								    onrowmouseover="this.style.cursor='default';this.style.backgroundColor='#FFF8DC';" 
-								  	 onrowmouseout="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"
-										  rendered="#{not empty crudBean.entity.listaClienteProduto}">						     
-									<f:facet name="header">
-										<rich:columnGroup>
-											<rich:column style="width: 5%; text-align: center;">
-												Código
-											</rich:column>
-											<rich:column style="width: 48%; text-align: center;">
-												Descrição
-											</rich:column>
-											<rich:column style="width: 9%; text-align: center;">
-												Receita
-											</rich:column>
-											<rich:column style="width: 9%; text-align: center;">
-												Lote Mín
-											</rich:column>
-											<rich:column style="width: 9%; text-align: center;">
-												Qtd Múlt
-											</rich:column>
-											<rich:column style="width: 10%; text-align: center;">
-												Vlr Und (R$)
-											</rich:column>
-											<rich:column style="width: 10%; text-align: center;">
-												Vlr Kg (R$)
-											</rich:column>
-															
-										</rich:columnGroup>
-									</f:facet>
-									<rich:column style="text-align: right;">
-										<h:outputText value="#{rst.idProduto}" />
-									</rich:column>
-									<rich:column style="text-align: left;">
-										<h:outputText value="#{rst.produto.desProduto}" />
-									</rich:column>
-									<rich:column style="text-align: left;">
-										<h:outputText value="#{rst.produto.receita.desReceita}" />
-									</rich:column>
-									<rich:column style="text-align: right;">
-										<h:outputText value="#{rst.produto.qtdLoteMinimo}" />
-									</rich:column>
-									<rich:column style="text-align: right;">
-										<h:outputText value="#{rst.produto.qtdMultiplo}" />
-									</rich:column>
-									<rich:column style="text-align: right;">
-										<h:outputText value="#{rst.vlrUnidade}" converter="converterMoeda"/>
-									</rich:column>
-									<rich:column style="text-align: right;">
-										<h:outputText value="#{rst.vlrQuilo}" converter="converterMoeda"/>
-									</rich:column>
-								</rich:dataTable>
-							</div>
-				</rich:tab>
 			</rich:tabPanel>	
 		</div>
 	
 		<div class="modal-footer">			
 			<input type="button" onclick="#{rich:component('panVisualizar')}.hide();" class="btn btn-default" value="Fechar (X)" accesskey="X"/>
 		</div>
-		
 </ui:composition>
