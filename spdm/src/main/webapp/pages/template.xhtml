@@ -118,6 +118,22 @@
 		            <li class="header">MENU PRINCIPAL</li>
 		           	
 		           	<h:panelGroup layout="block" rendered="#{sessionScope.loginUsuario.idGrupo == bundle.grupoFuncionario or sessionScope.loginUsuario.idGrupo == bundle.grupoGerente}">
+			            <li class="treeview #{sessionScope.flgMenuRel}">
+			              <a href="#">
+			                <i class="fa fa-file-text-o"></i>
+			                <span>Relatórios</span>
+			                <i class="fa fa-angle-left pull-right"></i>
+			              </a>
+			              <ul class="treeview-menu">
+			                <li class="#{sessionScope.flgMenuRelPed}"><h:commandLink action="#{producaoDiaBean.preparaPesquisar}"><i class="fa fa-navicon"></i> Produção do Dia</h:commandLink></li>
+			                <li class="#{sessionScope.flgMenuRelPer}"><h:commandLink action="#{producaoPeriodoBean.preparaPesquisar}"><i class="fa fa-building-o"></i> Produção por Período</h:commandLink></li>
+			                <li class="#{sessionScope.flgMenuRelLog}"><h:commandLink action="#{logisticaDiaBean.preparaPesquisar}"><i class="fa fa-building-o"></i> Logística do Dia</h:commandLink></li>
+			                <li class="#{sessionScope.flgMenuRelObs}"><h:commandLink action="#{observacaoPedidoBean.preparaPesquisar}"><i class="fa fa-building-o"></i> Observações</h:commandLink></li>
+			              </ul>
+			            </li>
+		           	</h:panelGroup>
+		           	
+		           	<h:panelGroup layout="block" rendered="#{sessionScope.loginUsuario.idGrupo == bundle.grupoFuncionario or sessionScope.loginUsuario.idGrupo == bundle.grupoGerente}">
 			            <li class="treeview #{sessionScope.flgMenuMan}">
 			              <a href="#">
 			                <i class="fa fa-cogs"></i>
