@@ -20,6 +20,7 @@
 		<t:saveState value="#{crudBean.listaProduto}" />
 		<t:saveState value="#{crudBean.listaPedidoResult}" />
 		<t:saveState value="#{crudBean.produto}" />
+		<t:saveState value="#{crudBean.pedidoDTO}" />
 		<t:saveState value="#{crudBean.produtoSelecionado}" />
 		<t:saveState value="#{crudBean.listaOpcaoEntrega}" />
 	</ui:define>
@@ -28,7 +29,7 @@
 		<h:panelGroup id="panelGroupDePesquisa" style="height:100%;width:100%;" rendered="#{crudBean.searching}">
 			<f:subview id="viewBusca">
 				<div class="box-body">
-					<h:outputText value="Pelo menos um campo com * é obrigatório." style="color: #9e5d28"></h:outputText>
+					<h:outputText value="Os campos com * são obrigatórios." style="color: #9e5d28"></h:outputText>
 				</div>
 			
 				<div class="box-body">
@@ -42,7 +43,7 @@
                     </div>
 				
                     <div class="form-group">
-                      <label for="inputEmail3" class="col-sm-2 control-label">Cliente </label>
+                      <label for="inputEmail3" class="col-sm-2 control-label">Cliente *</label>
                       <div class="col-sm-2" style="width: 13% !important;">
 	                  	<h:selectOneMenu value="#{crudBean.searchObject.idCliente}" converter="simpleIndexConverter" styleClass="form-control" style="width:310px; display: initial;">								
 							<t:selectItems var="o" itemValue="#{o.idCliente}" itemLabel="#{o.desCliente}" value="#{crudBean.listaCliente}" />
@@ -51,25 +52,12 @@
                     </div>
                     
                     <div class="form-group">
-                      <label for="inputEmail3" class="col-sm-2 control-label">Data do Pedido * </label>
+                      <label for="inputEmail3" class="col-sm-2 control-label">Data da Inclusão * </label>
                       <div class="col-sm-2" style="width: 13% !important;">
 	                	  <rich:calendar value="#{crudBean.searchObject.datPedido}" buttonClass="glyphicon glyphicon-calendar" inputSize="9" buttonIcon="../images/calendar.png"  datePattern="dd/MM/yyyy" inputClass="form-control" showWeeksBar="false" enableManualInput="true" oninputkeypress="return formataData(event,this);" maxlength="10"/>
 	                  </div>
                     </div>
             	</div>
-            	
-            	<div class="form-group">
-		          <label class="col-md-2 control-label">Situação</label>
-		          <div class="col-md-4">
-		          	<div style="width: 250px;" class="checkbox">
-						<h:selectOneRadio value="#{crudBean.searchObject.flgAtivo}" style="width: 100%;" >
-							<f:selectItem itemValue="T" itemLabel="Todos" />
-							<f:selectItem itemValue="S" itemLabel="Ativos" />
-							<f:selectItem itemValue="N" itemLabel="Inativos"/>
-						</h:selectOneRadio>
-					</div>
-		          </div>
-		       </div>
 			</f:subview>
 		</h:panelGroup>	
 		
@@ -152,7 +140,7 @@
 											<rich:column style="width: 27%; text-align: center;">
 												Cliente
 											</rich:column>
-											<rich:column style="width: 45%; text-align: center;">
+											<rich:column style="width: 48%; text-align: center;">
 												Produto
 											</rich:column>
 											<rich:column style="width: 5%; text-align: center;">
@@ -161,7 +149,6 @@
 											<rich:column style="width: 5%; text-align: center;">
 												Opção Entrega
 											</rich:column>
-											<rich:column style="width: 3%; text-align: center;" />
 										</rich:columnGroup>
 									</f:facet>
 									<rich:column style="text-align: center;">
@@ -188,13 +175,13 @@
 													<rich:column style="width: 3%; text-align: center;"/>
 												</rich:columnGroup>
 											</f:facet>
-											<rich:column style="text-align: left;">
-												 <h:outputText value="#{rstProduto.desProduto}" />
+											<rich:column style="text-align: left;" rendered="#{rstProduto.flgAtivo == 'S'}">
+												 <h:outputText value="#{rstProduto.desProduto}"/>
 											</rich:column>
-											<rich:column style="text-align: left;">
-												 <h:outputText value="#{rstProduto.qtdSolicitada}" />
+											<rich:column style="text-align: left;" rendered="#{rstProduto.flgAtivo == 'S'}">
+												 <h:outputText value="#{rstProduto.qtdSolicitada}"/>
 											</rich:column>
-											<rich:column style="text-align: left;">
+											<rich:column style="text-align: left;" rendered="#{rstProduto.flgAtivo == 'S'}">
 												 <a4j:commandButton image="../images/inativar.png" style="border:none; width: 18px; height: 18px;" title="EXCLUIR" action="#{crudBean.removerProduto}" render="panelProdutoResult,tblDataProduto">
 													<f:setPropertyActionListener target="#{crudBean.idClienteRemover}" value="#{rst.cliente.idCliente}" />
 													<f:setPropertyActionListener target="#{crudBean.idProdutoRemover}" value="#{rstProduto.idProduto}" />
@@ -214,14 +201,7 @@
 										  </h:selectOneMenu>
 					                   </div>
 				                 	</rich:column>
-				                 	
-									<rich:column style="text-align: center; vertical-align: middle;">
-										<a4j:commandButton image="../images/inativar.png" style="border:none; width: 18px; height: 18px;" title="EXCLUIR" action="#{crudBean.removerPedido}" render="panelProdutoResult">
-											<f:setPropertyActionListener target="#{crudBean.idClienteRemover}" value="#{rst.cliente.idCliente}" />
-										</a4j:commandButton>																						
-									</rich:column>
 								</rich:dataTable>
-								
 							</div>
 		                </h:panelGroup>
 		                
@@ -253,14 +233,17 @@
 								<div style="float:left;">
 					        		<a4j:commandButton image="../images/edit.png" style="border:none; width: 20px; height: 20px;" title="ALTERAR" action="#{crudBean.preparaAlterar}" render="formulario, panelTitle" rendered="#{rst.flgAtivo == 'S'}">
 					        			<f:setPropertyActionListener target="#{crudBean.idPedidoSelecionado}" value="#{rst.idPedido}" />
+					        			<f:setPropertyActionListener target="#{crudBean.idCodigoPedidoIntegracaoSelecionado}" value="#{rst.idCodigoPedidoIntegracao}" />
 					        			<f:setPropertyActionListener target="#{crudBean.idClienteSelecionado}" value="#{rst.cliente.idCliente}" />
 					        			<f:setPropertyActionListener target="#{crudBean.desClienteSelecionado}" value="#{rst.cliente.desCliente}" />
 					        		</a4j:commandButton>
 																
 									&nbsp;&nbsp;
 									
-					        		<a4j:commandButton image="../images/inativar.png" style="border:none; width: 20px; height: 20px;" title="INATIVAR" action="#{crudBean.inativar}" render="formulario, panelTitle" onclick="if (!confirm('Deseja realmente inativar este registro?')) return false" rendered="#{rst.flgAtivo == 'S'}">
+					        		<a4j:commandButton image="../images/inativar.png" style="border:none; width: 20px; height: 20px;" title="CANCELAR" action="#{crudBean.inativar}" render="formulario, panelTitle" onclick="if (!confirm('Deseja realmente cancelar este pedido?')) return false" rendered="#{rst.flgAtivo == 'S'}">
 					        			<f:setPropertyActionListener target="#{crudBean.idPedidoSelecionado}" value="#{rst.idPedido}" />
+					        			<f:setPropertyActionListener target="#{crudBean.idCodigoPedidoSelecionado}" value="#{rst.idCodigoPedido}" />
+					        			<f:setPropertyActionListener target="#{crudBean.idCodigoPedidoIntegracaoSelecionado}" value="#{rst.idCodigoPedidoIntegracao}" />
 					        			<f:setPropertyActionListener target="#{crudBean.idClienteSelecionado}" value="#{rst.cliente.idCliente}" />
 					        		</a4j:commandButton>
 					        		
@@ -272,19 +255,14 @@
 					        	
 					        	&nbsp;&nbsp;
 					        	
-					        	<b><h:outputText value=" Cliente: "/></b>					
-								<h:outputText value=" #{rst.cliente.desCliente}"/>
-					        	
-					        	&nbsp;&nbsp;
-					        	
-					        	<b><h:outputText value=" Data do Pedido: "/></b>					
+					        	<b><h:outputText value=" Data da Produção: "/></b>					
 								<h:outputText value=" #{rst.stringData}"/>
 								
 								&nbsp;&nbsp;
 					        	
-					        	<b><h:outputText value=" Situação: "/></b>					
-								<h:outputText value="Ativo" rendered="#{rst.flgAtivo == 'S'}"/>
-								<h:outputText value="Inativo" rendered="#{rst.flgAtivo == 'N'}"/>
+					        	<b><h:outputText value=" Cancelado: "/></b>					
+								<h:outputText value="Não" rendered="#{rst.flgAtivo == 'S'}"/>
+								<h:outputText value="Sim" rendered="#{rst.flgAtivo == 'N'}"/>
 					        	
 							</rich:column>
 							

@@ -1,14 +1,11 @@
 package br.com.a2dm.spdm.bean;
 
 import java.math.BigInteger;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
+import java.util.Optional;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
@@ -16,6 +13,8 @@ import javax.faces.bean.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 
+import br.com.a2dm.brcmn.dto.PedidoDTO;
+import br.com.a2dm.brcmn.dto.ProdutoDTO;
 import br.com.a2dm.brcmn.util.jsf.AbstractBean;
 import br.com.a2dm.brcmn.util.jsf.JSFUtil;
 import br.com.a2dm.brcmn.util.jsf.Variaveis;
@@ -25,11 +24,12 @@ import br.com.a2dm.spdm.entity.OpcaoEntrega;
 import br.com.a2dm.spdm.entity.Pedido;
 import br.com.a2dm.spdm.entity.PedidoProduto;
 import br.com.a2dm.spdm.entity.Produto;
+import br.com.a2dm.spdm.omie.service.OmiePedidoService;
+import br.com.a2dm.spdm.omie.service.OmieProdutoService;
 import br.com.a2dm.spdm.service.ClienteService;
 import br.com.a2dm.spdm.service.OpcaoEntregaService;
-import br.com.a2dm.spdm.service.PedidoProdutoService;
 import br.com.a2dm.spdm.service.PedidoService;
-import br.com.a2dm.spdm.service.ProdutoService;
+import br.com.a2dm.spdm.utils.DateUtils;
 
 @RequestScoped
 @ManagedBean
@@ -44,10 +44,13 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 	private Pedido pedido;
 	private List<Pedido> listaPedidoResult;
 	private List<OpcaoEntrega> listaOpcaoEntrega;
+	private PedidoDTO pedidoDTO;
 	
 	private JSFUtil util = new JSFUtil();
 	private BigInteger qtdSolicitada;
 	private BigInteger idPedidoSelecionado;
+	private BigInteger idCodigoPedidoSelecionado;
+	private BigInteger idCodigoPedidoIntegracaoSelecionado;
 	private BigInteger idClienteSelecionado;
 	private BigInteger idClienteRemover;
 	private BigInteger idProdutoRemover;
@@ -84,7 +87,6 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 		c.set(Calendar.MILLISECOND, 0);
 		
 		this.getSearchObject().setDatPedido(c.getTime());		
-		this.pesquisar(null);
 		
 		//CARREGANDO LISTA DE CLIENTES		
 		Cliente cliente = new Cliente();
@@ -132,14 +134,24 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 		
 		if (this.getEntity().getIdCliente() != null) 
 		{
-			Produto produto = new Produto();
-			produto.setFlgAtivo("S");
-			produto.setFiltroMap(new HashMap<String, Object>());
-			produto.getFiltroMap().put("flgAtivoClienteProduto", "S");
-			produto.getFiltroMap().put("idCliente", this.getEntity().getIdCliente());
+			List<ProdutoDTO> listaProduto = OmieProdutoService.getInstance().listarProdutosPorCliente(this.getEntity().getIdCliente());
 			
-			List<Produto> lista = ProdutoService.getInstancia().pesquisar(produto, ProdutoService.JOIN_CLIENTE_PRODUTO);
-			this.getListaProduto().addAll(lista);
+			if (listaProduto != null
+					&& listaProduto.size() > 0) {
+				for (ProdutoDTO element: listaProduto) { 
+					Produto produto = new Produto();
+					produto.setIdProduto(element.getIdProduto());
+					produto.setDesProduto(element.getDesProduto());
+					produto.setValorUnitario(element.getValorUnitario());
+					produto.setQtdLoteMinimo(element.getQtdLoteMinimo());
+					produto.setQtdMultiplo(element.getQtdMultiplo());
+					
+					if (produto.getValorUnitario() != null 
+							&& produto.getValorUnitario().doubleValue() > 0) {
+						this.getListaProduto().add(produto);
+					}
+				}
+			}
 		}
 	}
 	
@@ -156,9 +168,14 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 	
 	public void buscarInformacoes() throws Exception {
 		if (this.getProduto().getIdProduto() != null && this.getProduto().getIdProduto().intValue() > 0) {
-			Produto produto = new Produto();
-			produto.setIdProduto(this.getProduto().getIdProduto());
-			produtoSelecionado = ProdutoService.getInstancia().get(produto, 0);
+			Optional<Produto> produtoOptional = this.getListaProduto().stream()
+					                                   .filter(x -> x.getIdProduto() == this.getProduto().getIdProduto())
+					                                   .findFirst();
+			
+			if (produtoOptional.isPresent()) {
+				produtoSelecionado = produtoOptional.get();
+			}
+					                                
 		} else {
 			setProdutoSelecionado(null);
 		}
@@ -169,10 +186,12 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 	{
 		if((this.getSearchObject().getIdPedido() == null
 				|| this.getSearchObject().getIdPedido().intValue() <= 0)
-				&& (this.getSearchObject().getDatPedido() == null
+				|| (this.getSearchObject().getIdCliente() == null
+						|| this.getSearchObject().getIdCliente().intValue() <= 0)
+				|| (this.getSearchObject().getDatPedido() == null
 					|| this.getSearchObject().getDatPedido().toString().trim().equals("")))
 		{
-			throw new Exception("Pelo menos um campo com * é obrigatório!");
+			throw new Exception("Os campos com * são obrigatórios!");
 		}
 	}
 	
@@ -182,50 +201,39 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 		{
 			if(validarAcesso(Variaveis.ACAO_PREPARA_ALTERAR))
 			{
-				PedidoProduto pedidoProduto = new PedidoProduto();
-				pedidoProduto.setIdPedido(this.getIdPedidoSelecionado());
-				pedidoProduto.setFlgAtivo("S");
+				Pedido pedido = new Pedido();
+				pedido.setIdUsuarioAlt(util.getUsuarioLogado().getIdUsuario());
+				pedido.setIdCodigoPedidoIntegracao(this.getIdCodigoPedidoIntegracaoSelecionado());
+				pedido.setDatAlteracao(new Date());
+				pedido.setFlgAtivo("S");
+				pedido.setIdPedido(pedidoDTO.getIdPedido());
+				pedido.setObsPedido(pedidoDTO.getObservacao());
+				pedido.setDatPedido(pedidoDTO.getDataPedido());
+				pedido.setIdOpcaoEntrega(pedidoDTO.getIdOpcaoEntrega());
 				
-				List<PedidoProduto> listaPedidoProduto = PedidoProdutoService.getInstancia().pesquisar(pedidoProduto, PedidoProdutoService.JOIN_PRODUTO | PedidoProdutoService.JOIN_PEDIDO);
+				Cliente cliente = new Cliente();
+				cliente.setIdCliente(pedidoDTO.getIdCliente());
+				cliente = ClienteService.getInstancia().get(cliente, 0);
+				pedido.setCliente(cliente);
+				pedido.getCliente().setListaProduto(new ArrayList<>());
 				
-				if (listaPedidoProduto != null && listaPedidoProduto.size() > 0) {
-					Pedido pedido = new Pedido();
-					pedido.setIdUsuarioAlt(util.getUsuarioLogado().getIdUsuario());
-					pedido.setDatAlteracao(new Date());
-					pedido.setFlgAtivo("S");
-					pedido.setIdPedido(listaPedidoProduto.get(0).getPedido().getIdPedido());
-					pedido.setObsPedido(listaPedidoProduto.get(0).getPedido().getObsPedido());
-					pedido.setDatPedido(listaPedidoProduto.get(0).getPedido().getDatPedido());
-					pedido.setIdOpcaoEntrega(listaPedidoProduto.get(0).getPedido().getIdOpcaoEntrega());
-					
-					if (listaPedidoProduto.get(0).getPedido().getVlrFrete() != null && listaPedidoProduto.get(0).getPedido().getVlrFrete().intValue() > 0) {
-						pedido.setVlrFreteFormatado(new DecimalFormat("#,##0.00", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(listaPedidoProduto.get(0).getPedido().getVlrFrete()));
-					} else {
-						pedido.setVlrFreteFormatado(new DecimalFormat("#,##0.00", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(0.00));
-					}
-					
-					Cliente cliente = new Cliente();
-					cliente.setIdCliente(this.getIdClienteSelecionado());
-					cliente.setDesCliente(this.getDesClienteSelecionado());
-					pedido.setCliente(cliente);
-					
-					if (pedido.getCliente().getListaProduto() == null) {
-						pedido.getCliente().setListaProduto(new ArrayList<>());
-					}
-					
-					for (PedidoProduto element : listaPedidoProduto) {
+				if (pedidoDTO.getProdutos() != null
+						&& pedidoDTO.getProdutos().size() > 0) { 
+					for (ProdutoDTO element: pedidoDTO.getProdutos()) {
 						Produto produto = new Produto();
-						produto.setIdProduto(element.getProduto().getIdProduto());
-						produto.setDesProduto(element.getProduto().getDesProduto());
+						produto.setIdProduto(element.getIdProduto());
+						produto.setDesProduto(element.getDesProduto());
+						produto.setValorUnitario(element.getValorUnitario());
+						produto.setFlgAtivo("S");
 						produto.setQtdSolicitada(element.getQtdSolicitada());
-						
 						pedido.getCliente().getListaProduto().add(produto);
 					}
-					this.setListaPedidoResult(new ArrayList<>());
-					this.getListaPedidoResult().add(0, pedido);
 				}
 				
-				getEntity().setIdCliente(this.getIdClienteSelecionado());
+				this.setListaPedidoResult(new ArrayList<>());
+				this.getListaPedidoResult().add(0, pedido);
+				
+				getEntity().setIdCliente(pedidoDTO.getIdCliente());
 				buscarProdutos();
 				setCurrentState(STATE_EDIT);
 				setListaAlterar();
@@ -258,14 +266,13 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 			{
 				if(validarAcesso(Variaveis.ACAO_INATIVAR))
 				{
-					Pedido pedido = new Pedido();
-					util.getUsuarioLogado().setIdCliente(this.getIdClienteSelecionado());
-					pedido.setIdPedido(this.getIdPedidoSelecionado());
-					pedido = PedidoService.getInstancia().inativar(pedido);
-					this.setPedido(pedido);
+					PedidoDTO pedidoDTO = new PedidoDTO();
+					pedidoDTO.setCodigoPedidoIntegracao(this.getIdCodigoPedidoIntegracaoSelecionado()); 
+					pedidoDTO.setCodigoPedido(this.getIdCodigoPedidoSelecionado());
+					OmiePedidoService.getInstance().inativarPedido(this.getIdClienteSelecionado(), pedidoDTO);
 
 					this.setSearchResult(new ArrayList<>());
-					FacesMessage message = new FacesMessage("Registro inativado com sucesso!");
+					FacesMessage message = new FacesMessage("Pedido cancelado com sucesso!");
 					message.setSeverity(FacesMessage.SEVERITY_INFO);
 					FacesContext.getCurrentInstance().addMessage(null, message);
 				}
@@ -289,8 +296,13 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 				validarPesquisar();
 				completarPesquisar();
 				validarCampoTexto();
-				List<Pedido> lista = PedidoService.getInstancia().pesquisarGeradorPedido(this.getSearchObject());
-				this.setSearchResult(lista);
+				String dateStr = DateUtils.formatDate(this.getSearchObject().getDatPedido(),"yyyy-MM-dd");
+				PedidoDTO pedidoDTO = OmiePedidoService.getInstance().pesquisarPedido(this.getSearchObject().getIdCliente(), 
+																					  this.getSearchObject().getIdPedido(), 
+																					  dateStr);
+				
+				setPedidoDTO(pedidoDTO);
+				adicionarPedidoDTO();
 				completarPosPesquisar();
 				setCurrentState(STATE_SEARCH);
 			}
@@ -305,6 +317,35 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 				FacesContext.getCurrentInstance().addMessage(null, message);
 			this.setSearchResult(new ArrayList<Pedido>());
 		}
+	}
+	
+	private void adicionarPedidoDTO() {
+		List<Pedido> lista = new ArrayList<>();
+		Pedido pedido = new Pedido();
+		pedido.setIdPedido(pedidoDTO.getIdPedido());
+		pedido.setStringData(DateUtils.formatDatePtBr(pedidoDTO.getDataPedido()));
+		pedido.setObservacao(pedidoDTO.getObservacao());
+		pedido.setIdCodigoPedido(pedidoDTO.getCodigoPedido());
+		pedido.setIdCodigoPedidoIntegracao(pedidoDTO.getCodigoPedidoIntegracao());
+		pedido.setIdOpcaoEntrega(pedidoDTO.getIdOpcaoEntrega());
+		pedido.setFlgAtivo(pedidoDTO.getFlgAtivo());
+		pedido.setListaPedidoProduto(new ArrayList<>());
+		
+		if (pedidoDTO.getProdutos() != null
+				&& pedidoDTO.getProdutos().size() > 0) { 
+			for (ProdutoDTO element: pedidoDTO.getProdutos()) {
+				PedidoProduto pedidoProduto = new PedidoProduto();
+				pedidoProduto.setProduto(new Produto());
+				pedidoProduto.getProduto().setDesProduto(element.getDesProduto());
+				pedidoProduto.getProduto().setFlgAtivo("S");
+				pedidoProduto.getProduto().setValorUnitario(element.getValorUnitario());
+				pedidoProduto.setQtdSolicitada(element.getQtdSolicitada());
+				
+				pedido.getListaPedidoProduto().add(pedidoProduto);
+			}
+		}
+		lista.add(pedido);
+		this.setSearchResult(lista);
 	}
 	
 	public void adicionarClienteProduto(ActionEvent event)
@@ -356,15 +397,28 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 						existeCliente = true;
 						for (Produto elementProduto : element.getCliente().getListaProduto()) {
 							if (elementProduto.getIdProduto().intValue() == produto.getIdProduto().intValue()) {
-								throw new Exception("Este produto já está adicionado na lista para o cliente selecionado!");
+								if (elementProduto.getFlgAtivo().equalsIgnoreCase("S")) {
+									throw new Exception("Este produto já está adicionado na lista para o cliente selecionado!");
+								} else {
+									elementProduto.setQtdSolicitada(this.getQtdSolicitada());
+									elementProduto.setFlgAtivo("S");
+									return;
+								}
 							}
 						}
 						
 						//ADICIONANDO O PRODUTO
 						Produto produto = new Produto();
 						produto.setIdProduto(this.getProduto().getIdProduto());
-						produto = ProdutoService.getInstancia().get(produto, 0);
+						
+						Optional<Produto> produtoOptional = this.getListaProduto().stream()
+                                .filter(x -> x.getIdProduto() == this.getProduto().getIdProduto())
+                                .findFirst();
+						
+						produto.setValorUnitario(produtoOptional.get().getValorUnitario());
+						produto.setDesProduto(produtoOptional.get().getDesProduto());
 						produto.setQtdSolicitada(this.getQtdSolicitada());
+						produto.setFlgAtivo("S");
 						
 						element.getCliente().getListaProduto().add(produto);
 					}
@@ -374,8 +428,15 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 			if (!existeCliente) {
 				Produto produto = new Produto();
 				produto.setIdProduto(this.getProduto().getIdProduto());
-				produto = ProdutoService.getInstancia().get(produto, 0);
+				
+				Optional<Produto> produtoOptional = this.getListaProduto().stream()
+                        .filter(x -> x.getIdProduto() == this.getProduto().getIdProduto())
+                        .findFirst();
+				
+				produto.setValorUnitario(produtoOptional.get().getValorUnitario());
+				produto.setDesProduto(produtoOptional.get().getDesProduto());
 				produto.setQtdSolicitada(this.getQtdSolicitada());
+				produto.setFlgAtivo("S");
 				
 				Cliente cliente = new Cliente();
 				cliente.setIdCliente(this.getEntity().getIdCliente());
@@ -449,9 +510,8 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
       {
     	  if(validarAcesso(Variaveis.ACAO_ALTERAR))
     	  {
-//    		  validarInserir();
     		  PedidoService.getInstancia().alterarGeradorPedido(getListaPedidoResult());
-    		  FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Registro alterado com sucesso", null));
+    		  FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Pedido alterado com sucesso", null));
     		  
     		  this.cancelar(event);
     	  }
@@ -482,7 +542,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
     		  validarInserir();
     		  completarInserir();
     		  PedidoService.getInstancia().inserirGeradorPedido(getListaPedidoResult());
-    		  FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Registro inserido com sucesso", null));
+    		  FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Pedido inserido com sucesso", null));
     		  
     		  this.cancelar(event);
     	  }
@@ -522,14 +582,9 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 				for (Produto elementProduto : element.getCliente().getListaProduto()) {
 					if(elementProduto.getIdProduto().intValue() == this.getIdProdutoRemover().intValue()) 
 					{
-						element.getCliente().getListaProduto().remove(elementProduto);
+						elementProduto.setFlgAtivo("N");
 						break;
 					}
-				}
-				
-				if (element.getCliente().getListaProduto() == null || element.getCliente().getListaProduto().size() <= 0) {
-					this.getListaPedidoResult().remove(element);
-					return;
 				}
 			}
 		}
@@ -541,7 +596,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 		calendar.setTime(data);
 		
 		String nome = "";
-		
+		  
 		int dia = calendar.get(Calendar.DAY_OF_WEEK);
 		
 		switch(dia)
@@ -661,6 +716,22 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 	public void setIdClienteSelecionado(BigInteger idClienteSelecionado) {
 		this.idClienteSelecionado = idClienteSelecionado;
 	}
+	
+	public BigInteger getIdCodigoPedidoSelecionado() {
+		return idCodigoPedidoSelecionado;
+	}
+
+	public void setIdCodigoPedidoSelecionado(BigInteger idCodigoPedidoSelecionado) {
+		this.idCodigoPedidoSelecionado = idCodigoPedidoSelecionado;
+	}
+
+	public BigInteger getIdCodigoPedidoIntegracaoSelecionado() {
+		return idCodigoPedidoIntegracaoSelecionado;
+	}
+
+	public void setIdCodigoPedidoIntegracaoSelecionado(BigInteger idCodigoPedidoIntegracaoSelecionado) {
+		this.idCodigoPedidoIntegracaoSelecionado = idCodigoPedidoIntegracaoSelecionado;
+	}
 
 	public String getDesClienteSelecionado() {
 		return desClienteSelecionado;
@@ -676,5 +747,13 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 
 	public void setListaOpcaoEntrega(List<OpcaoEntrega> listaOpcaoEntrega) {
 		this.listaOpcaoEntrega = listaOpcaoEntrega;
+	}
+
+	public PedidoDTO getPedidoDTO() {
+		return pedidoDTO;
+	}
+
+	public void setPedidoDTO(PedidoDTO pedidoDTO) {
+		this.pedidoDTO = pedidoDTO;
 	}
 }

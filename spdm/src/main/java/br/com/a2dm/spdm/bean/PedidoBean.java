@@ -2,14 +2,12 @@ package br.com.a2dm.spdm.bean;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
+import java.util.Optional;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
@@ -18,6 +16,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.servlet.http.HttpServletResponse;
 
+import br.com.a2dm.brcmn.dto.PedidoDTO;
+import br.com.a2dm.brcmn.dto.ProdutoDTO;
 import br.com.a2dm.brcmn.util.jsf.AbstractBean;
 import br.com.a2dm.brcmn.util.jsf.JSFUtil;
 import br.com.a2dm.brcmn.util.jsf.Variaveis;
@@ -28,11 +28,11 @@ import br.com.a2dm.spdm.entity.OpcaoEntrega;
 import br.com.a2dm.spdm.entity.Pedido;
 import br.com.a2dm.spdm.entity.PedidoProduto;
 import br.com.a2dm.spdm.entity.Produto;
-import br.com.a2dm.spdm.service.ClienteService;
+import br.com.a2dm.spdm.omie.service.OmiePedidoService;
+import br.com.a2dm.spdm.omie.service.OmieProdutoService;
 import br.com.a2dm.spdm.service.OpcaoEntregaService;
-import br.com.a2dm.spdm.service.PedidoProdutoService;
 import br.com.a2dm.spdm.service.PedidoService;
-import br.com.a2dm.spdm.service.ProdutoService;
+import br.com.a2dm.spdm.utils.DateUtils;
 
 @RequestScoped
 @ManagedBean
@@ -52,6 +52,10 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 	private List<Produto> listaProdutoResult;
 	private List<OpcaoEntrega> listaOpcaoEntrega;
 	private OpcaoEntrega opcaoEntrega;
+	private PedidoDTO pedidoDTO;
+	private BigInteger idCodigoPedidoSelecionado;
+	private BigInteger idCodigoPedidoIntegracaoSelecionado;
+	private BigInteger idClienteSelecionado;
 	
 	private final String LISTA_PRODUTOS_SESSAO = "produtos";
 	
@@ -93,14 +97,28 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 	{
 		this.iniciaListaProdutos();
 		
-		Produto produto = new Produto();
-		produto.setFlgAtivo("S");
 		produto.setFiltroMap(new HashMap<String, Object>());
 		produto.getFiltroMap().put("flgAtivoClienteProduto", "S");
 		produto.getFiltroMap().put("idCliente", util.getUsuarioLogado().getIdCliente());
 		
-		List<Produto> lista = ProdutoService.getInstancia().pesquisar(produto, ProdutoService.JOIN_CLIENTE_PRODUTO);
-		this.getListaProduto().addAll(lista);
+		List<ProdutoDTO> listaProduto = OmieProdutoService.getInstance().listarProdutosPorCliente(util.getUsuarioLogado().getIdCliente());
+		
+		if (listaProduto != null
+				&& listaProduto.size() > 0) {
+			for (ProdutoDTO element: listaProduto) { 
+				Produto produto = new Produto();
+				produto.setIdProduto(element.getIdProduto());
+				produto.setDesProduto(element.getDesProduto());
+				produto.setValorUnitario(element.getValorUnitario());
+				produto.setQtdLoteMinimo(element.getQtdLoteMinimo());
+				produto.setQtdMultiplo(element.getQtdMultiplo());
+				
+				if (produto.getValorUnitario() != null 
+						&& produto.getValorUnitario().doubleValue() > 0) {
+					this.getListaProduto().add(produto);
+				}
+			}
+		}
 		
 		this.iniciaListaOpcaoEntrega();
 		
@@ -108,6 +126,33 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 		opcaoEntrega.setFlgAtivo("S");
 		List<OpcaoEntrega> listaOpcaoEntrega = OpcaoEntregaService.getInstancia().pesquisar(opcaoEntrega, 0);
 		this.getListaOpcaoEntrega().addAll(listaOpcaoEntrega);
+	}
+	
+	public void buscarProdutos() throws Exception {
+		this.setProduto(new Produto());
+		this.iniciaListaProdutos();
+		
+		if (this.getEntity().getIdCliente() != null) 
+		{
+			List<ProdutoDTO> listaProduto = OmieProdutoService.getInstance().listarProdutosPorCliente(this.getEntity().getIdCliente());
+			
+			if (listaProduto != null
+					&& listaProduto.size() > 0) {
+				for (ProdutoDTO element: listaProduto) { 
+					Produto produto = new Produto();
+					produto.setIdProduto(element.getIdProduto());
+					produto.setDesProduto(element.getDesProduto());
+					produto.setValorUnitario(element.getValorUnitario());
+					produto.setQtdLoteMinimo(element.getQtdLoteMinimo());
+					produto.setQtdMultiplo(element.getQtdMultiplo());
+					
+					if (produto.getValorUnitario() != null 
+							&& produto.getValorUnitario().doubleValue() > 0) {
+						this.getListaProduto().add(produto);
+					}
+				}
+			}
+		}
 	}
 	
 	@Override
@@ -120,37 +165,13 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 				validarPesquisar();
 				completarPesquisar();
 				
-				Pedido pedido = new Pedido();
-				pedido.setFlgAtivo("S");
-				pedido.setFiltroMap(new HashMap<String, Object>());
-				pedido.getFiltroMap().put("flgAtivoPedidoProduto", "S");
+				String dateStr = DateUtils.formatDate(this.getSearchObject().getDatPedido(),"yyyy-MM-dd");
+				PedidoDTO pedidoDTO = OmiePedidoService.getInstance().pesquisarPedido(util.getUsuarioLogado().getIdCliente(), 
+																					 this.getSearchObject().getIdPedido(), 
+																					 dateStr);
 				
-				if (this.getSearchObject().getIdPedido() != null
-						&& this.getSearchObject().getIdPedido().intValue() > 0) 
-				{
-					pedido.setIdPedido(this.getSearchObject().getIdPedido());
-				}
-				
-				if (this.getSearchObject().getDatPedido() != null) 
-				{
-					pedido.setDatPedido(this.getSearchObject().getDatPedido());
-				}
-				
-				pedido.setIdCliente(util.getUsuarioLogado().getIdCliente());
-				
-				pedido = PedidoService.getInstancia().get(pedido, PedidoService.JOIN_USUARIO_CAD
-																| PedidoService.JOIN_PEDIDO_PRODUTO
-																| PedidoService.JOIN_PEDIDO_OPCAO_ENTREGA
-																| PedidoService.JOIN_PEDIDO_PRODUTO_PRODUTO
-																| PedidoService.JOIN_CLIENTE);
-				
-				if (pedido.getVlrFrete() != null && pedido.getVlrFrete().intValue() > 0) {
-					pedido.setVlrFreteFormatado(new DecimalFormat("#,##0.00", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(pedido.getVlrFrete()));
-				} else {
-					pedido.setVlrFreteFormatado(new DecimalFormat("#,##0.00", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(0.00));
-				}
-				
-				this.setPedido(pedido);
+				setPedidoDTO(pedidoDTO);
+				adicionarPedidoDTO();
 				completarPosPesquisar();
 				setCurrentState(STATE_SEARCH);
 			}
@@ -166,6 +187,35 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 			this.setPedido(new Pedido());
 		}
     }
+	
+	private void adicionarPedidoDTO() {
+		List<Pedido> lista = new ArrayList<>();
+		Pedido pedido = new Pedido();
+		pedido.setIdPedido(pedidoDTO.getIdPedido());
+		pedido.setStringData(DateUtils.formatDatePtBr(pedidoDTO.getDataPedido()));
+		pedido.setObservacao(pedidoDTO.getObservacao());
+		pedido.setIdCodigoPedido(pedidoDTO.getCodigoPedido());
+		pedido.setIdCodigoPedidoIntegracao(pedidoDTO.getCodigoPedidoIntegracao());
+		pedido.setIdOpcaoEntrega(pedidoDTO.getIdOpcaoEntrega());
+		pedido.setFlgAtivo(pedidoDTO.getFlgAtivo());
+		pedido.setListaPedidoProduto(new ArrayList<>());
+		
+		if (pedidoDTO.getProdutos() != null
+				&& pedidoDTO.getProdutos().size() > 0) { 
+			for (ProdutoDTO element: pedidoDTO.getProdutos()) {
+				PedidoProduto pedidoProduto = new PedidoProduto();
+				pedidoProduto.setProduto(new Produto());
+				pedidoProduto.getProduto().setDesProduto(element.getDesProduto());
+				pedidoProduto.getProduto().setFlgAtivo("S");
+				pedidoProduto.getProduto().setValorUnitario(element.getValorUnitario());
+				pedidoProduto.setQtdSolicitada(element.getQtdSolicitada());
+				
+				pedido.getListaPedidoProduto().add(pedidoProduto);
+			}
+		}
+		lista.add(pedido);
+		this.setSearchResult(lista);
+	}
 	
 	@Override
 	protected void validarInserir() throws Exception
@@ -209,52 +259,12 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 		
 		int dia = calendar.get(Calendar.DAY_OF_WEEK);
 		
-		if (!isClienteEvento() && dia == Calendar.SUNDAY) 
+		if (dia == Calendar.SUNDAY) 
 		{
 			throw new Exception("Não é possível realizar pedido para o dia de Domingo!");
 		}
-		
-		BigInteger qtdTotalSolicitada = BigInteger.ZERO;
-		
-		for (Produto produto : this.getListaProdutoResult())
-		{
-			if(produto.getQtdSolicitada() == null
-					|| produto.getQtdSolicitada().intValue() <= 0)
-			{
-				throw new Exception("A Quantidade do produto " + produto.getDesProduto() + " não foi preenchida!");
-			}
-			
-			if (!isClienteEvento()) {
-				if(produto.getQtdLoteMinimo().intValue() > produto.getQtdSolicitada().intValue())
-				{
-					throw new Exception("O Lote Mínimo do produto " + produto.getDesProduto() + " não foi atingida! Quantidade de Lote Mínimo: " + produto.getQtdLoteMinimo());
-				}
-				
-				if(produto.getQtdSolicitada().intValue() % produto.getQtdMultiplo().intValue() != 0)
-				{
-					throw new Exception("A Quantidade do produto " + produto.getDesProduto() + " deve ser solicitada em múltiplo de "+ produto.getQtdMultiplo() +"!");
-				}
-			}
-			qtdTotalSolicitada = qtdTotalSolicitada.add(produto.getQtdSolicitada());
-		}
-		
-		if (!isClienteEvento() && qtdTotalSolicitada.intValue() < 60) {
-			throw new Exception("É necessário solicitar, no mínimo, 60 pães!");
-		}
 	}
 
-	private boolean isClienteEvento() throws Exception {
-		Cliente cliente = new Cliente();
-		cliente.setIdCliente(util.getUsuarioLogado().getIdCliente());
-		
-		cliente = ClienteService.getInstancia().get(cliente, 0);
-		
-		if (cliente != null) {
-			return cliente.getFlgEvento() != null && !cliente.getFlgEvento().equalsIgnoreCase("") && cliente.getFlgEvento().equalsIgnoreCase("S");
-		}
-		return false;
-	}
-	
 	public void preparaAlterar()
 	{
 		try
@@ -263,34 +273,34 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 			{
 				util.getSession().removeAttribute(LISTA_PRODUTOS_SESSAO);
 				
-				this.getEntity().setObsPedido(this.getPedido().getObsPedido());
-				this.getEntity().setIdOpcaoEntrega(this.getPedido().getIdOpcaoEntrega());
-				
-				if (this.getPedido().getVlrFrete() != null && this.getPedido().getVlrFrete().intValue() > 0) {
-					this.getEntity().setVlrFreteFormatado(new DecimalFormat("#,##0.00", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(pedido.getVlrFrete()));
-				} else {
-					this.getEntity().setVlrFreteFormatado(new DecimalFormat("#,##0.00", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(0.00));
-				}
+				this.getEntity().setIdPedido(pedidoDTO.getIdPedido());
+				this.getEntity().setObsPedido(pedidoDTO.getObservacao());
+				this.getEntity().setFlgAtivo(pedidoDTO.getFlgAtivo());
+				this.getEntity().setDatPedido(pedidoDTO.getDataPedido());
+				this.getEntity().setIdOpcaoEntrega(pedidoDTO.getIdOpcaoEntrega());
+				this.getEntity().setIdCodigoPedidoIntegracao(pedidoDTO.getCodigoPedidoIntegracao());
 				
 				this.setTpPesquisaProduto(1);
 				this.setProduto(new Produto());
 				this.setListaProdutoResult(new ArrayList<Produto>());
 				this.atualizarFiltroProduto();
 				
-				PedidoProduto pedidoProduto = new PedidoProduto();
-				pedidoProduto.setIdPedido(this.getPedido().getIdPedido());
-				pedidoProduto.setFlgAtivo("S");
-				
-				List<PedidoProduto> listaPedidoProduto = PedidoProdutoService.getInstancia().pesquisar(pedidoProduto, PedidoProdutoService.JOIN_PRODUTO);
-				
 				this.setListaProdutoResult(new ArrayList<Produto>());
 				List<Produto> listaProdutoSessao = new ArrayList<Produto>();				
 				
-				for (PedidoProduto obj : listaPedidoProduto)
-				{
-					obj.getProduto().setQtdSolicitada(obj.getQtdSolicitada());
-					this.getListaProdutoResult().add(obj.getProduto());
-					listaProdutoSessao.add(obj.getProduto());
+				if (pedidoDTO.getProdutos() != null
+						&& pedidoDTO.getProdutos().size() > 0) { 
+					for (ProdutoDTO element: pedidoDTO.getProdutos()) {
+						Produto produto = new Produto();
+						produto.setIdProduto(element.getIdProduto());
+						produto.setDesProduto(element.getDesProduto());
+						produto.setValorUnitario(element.getValorUnitario());
+						produto.setFlgAtivo("S");
+						produto.setQtdSolicitada(element.getQtdSolicitada());
+						
+						this.getListaProdutoResult().add(produto);
+						listaProdutoSessao.add(produto);
+					}
 				}
 				
 				if (this.getEntity().getOpcaoEntrega() == null) {
@@ -334,102 +344,14 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
-	protected void completarAlterar() throws Exception 
-	{
-		String obs = this.getEntity().getObsPedido();
-		BigInteger idOpcaoEntrega = this.getEntity().getIdOpcaoEntrega();
-		String vlrFreteFormatado = this.getEntity().getVlrFreteFormatado();
-		
-		this.setEntity(pedido);
-		this.getEntity().setObsPedido(obs);
-		this.getEntity().setIdOpcaoEntrega(idOpcaoEntrega);
-		this.getEntity().setVlrFreteFormatado(vlrFreteFormatado);
-//		this.validarInserir();
-		this.getEntity().setDatAlteracao(new Date());
-		this.getEntity().setIdUsuarioAlt(util.getUsuarioLogado().getIdUsuario());
-		this.getEntity().setPlataforma(PedidoService.PLATAFORMA_WEB);
-		
-		List<Produto> listaSessao = (List<Produto>) util.getSession().getAttribute(LISTA_PRODUTOS_SESSAO);
-		List<Produto> listaRemovidos = new ArrayList<Produto>();
-		List<Produto> listaAdicionados = new ArrayList<Produto>();
-		List<Produto> listaMantidos = new ArrayList<Produto>();
-		List<Produto> listaFinal = new ArrayList<Produto>();
-		
-		for (Produto produtoSessao : listaSessao)
-		{
-			boolean flag = true;
-			
-			for(Produto produtoResult : this.getListaProdutoResult())
-			{
-				if(produtoResult.getIdProduto().intValue() == produtoSessao.getIdProduto().intValue())
-				{
-					flag = false;
-				}	
-			}
-			
-			if(flag)
-			{
-				//GUARDAR TODOS OS IDS DOS PRODUTOS REMOVIDOS COM FLAG N
-				Produto produto = new Produto();
-				produto.setIdProduto(produtoSessao.getIdProduto());
-				produto.setFlgAtivo("N");
-				listaRemovidos.add(produto);
-			}
-		}
-		
-		for (Produto produtoResult : this.getListaProdutoResult())
-		{
-			boolean flag = true;
-			
-			for (Produto produtoSessao : listaSessao)
-			{
-				if(produtoSessao.getIdProduto().intValue() == produtoResult.getIdProduto().intValue())
-				{
-					flag = false;
-				}
-			}
-			
-			if(flag)
-			{
-				//GUARDAR TODOS OS IDS DOS PRODUTOS ADICIONADOS COM FLAG S
-				Produto produto = new Produto();
-				produto.setIdProduto(produtoResult.getIdProduto());
-				produto.setQtdSolicitada(produtoResult.getQtdSolicitada());
-				produto.setFlgAtivo("S");
-				listaAdicionados.add(produto);
-			}
-		}
-		
-		for (Produto produtoSessao : listaSessao)
-		{
-			for(Produto produtoResult : this.getListaProdutoResult())
-			{
-				if(produtoResult.getIdProduto().intValue() == produtoSessao.getIdProduto().intValue())
-				{
-					produtoResult.setFlgAtivo(null);
-					listaMantidos.add(produtoResult);
-					break;
-				}	
-			}
-		}
-		
-		listaFinal.addAll(listaRemovidos);
-		listaFinal.addAll(listaAdicionados);
-		listaFinal.addAll(listaMantidos);
-		
-		this.getEntity().setListaProduto(listaFinal);
-	}
-	
-	@Override
 	protected void validarPesquisar() throws Exception
 	{
 		if((this.getSearchObject().getIdPedido() == null
 				|| this.getSearchObject().getIdPedido().intValue() <= 0)
-				&& (this.getSearchObject().getDatPedido() == null
+				|| (this.getSearchObject().getDatPedido() == null
 					|| this.getSearchObject().getDatPedido().toString().trim().equals("")))
 		{
-			throw new Exception("Pelo menos um campo com * é obrigatório!");
+			throw new Exception("Os campos com * são obrigatórios!");
 		}
 	}
 	
@@ -456,26 +378,32 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 	}
 	
 	@Override
-	protected void completarInserir() throws Exception
+	protected void completarAlterar() throws Exception
 	{
-		this.getEntity().setIdCliente(util.getUsuarioLogado().getIdCliente());
+		this.getEntity().setCliente(new Cliente());
+		this.getEntity().getCliente().setIdCliente(util.getUsuarioLogado().getIdCliente());
+		this.getEntity().getCliente().setListaProduto(this.getListaProdutoResult());
 		this.getEntity().setFlgAtivo("S");
-		this.getEntity().setDatCadastro(new Date());
-		this.getEntity().setIdUsuarioCad(util.getUsuarioLogado().getIdUsuario());
-		this.getEntity().setListaProduto(this.getListaProdutoResult());
-		this.getEntity().setPlataforma(PedidoService.PLATAFORMA_WEB);
 	}
 	
-	   public void inserir(ActionEvent event) 
+	@Override
+	protected void completarInserir() throws Exception
+	{
+		this.getEntity().setCliente(new Cliente());
+		this.getEntity().getCliente().setIdCliente(util.getUsuarioLogado().getIdCliente());
+		this.getEntity().getCliente().setListaProduto(this.getListaProdutoResult());
+		this.getEntity().setFlgAtivo("S");
+	}
+	
+	public void alterar(ActionEvent event) 
 	   {
 	      try
 	      {
-	    	  if(validarAcesso(Variaveis.ACAO_INSERIR))
+	    	  if(validarAcesso(Variaveis.ACAO_ALTERAR))
 	    	  {
-//	    		  validarInserir();
-	    		  completarInserir();
-	    		  PedidoService.getInstancia().inserir(getEntity());
-	    		  FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Registro inserido com sucesso. Protocolo do Pedido: "+ getEntity().getIdPedido(), null));
+	    		  completarAlterar();
+	    		  PedidoService.getInstancia().alterarPedido(getEntity());
+	    		  FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Pedido alterado com sucesso.", null));
 	    		  
 	    		  this.cancelar(event);
 	    	  }
@@ -491,70 +419,29 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 	      }
 	   }
 	
-	public void pesquisarProdutos()
-	{
-		try
-		{
-			if(util.getUsuarioLogado().getIdCliente() == null
-					|| util.getUsuarioLogado().getIdCliente().intValue() <= 0)
-			{
-				throw new Exception("Você precisa ser um Cliente para realizar pedidos no sistema!");
-			}
-			
-			Produto produto = new Produto();
-			produto.setFlgAtivo("S");
-			produto.setFiltroMap(new HashMap<String, Object>());
-			produto.getFiltroMap().put("flgAtivoClienteProduto", "S");
-			produto.getFiltroMap().put("idCliente", util.getUsuarioLogado().getIdCliente());
-			
-			
-			if(this.tpPesquisaProduto == 1)
-			{
-				if(this.filtroCodigoProduto == null 
-						|| this.filtroCodigoProduto.intValue() == 0)
-				{
-					produto.setIdProduto(new BigInteger("-1"));
-				}
-				else
-				{
-					produto.setIdProduto(this.filtroCodigoProduto);
-				}
-				
-				produto = ProdutoService.getInstancia().get(produto, ProdutoService.JOIN_CLIENTE_PRODUTO);
-				
-				if(produto == null)
-				{
-					this.setFiltroCodigoProduto(null);
-					this.setCodigoProduto(null);					
-					this.getProduto().setDesProduto(null);
-					this.getProduto().setIdProduto(null);
-				
-				}
-				else
-				{				
-					this.setProduto(produto);
-					this.setCodigoProduto(produto.getIdProduto());
-				}
-			}
-			else
-			{
-				if(this.tpPesquisaProduto == 2)
-				{
- 					produto.setDesProduto(this.filtroDescricaoProduto);
-					
-					this.iniciaListaProdutos();
-					List<Produto> lista = ProdutoService.getInstancia().pesquisar(produto, ProdutoService.JOIN_CLIENTE_PRODUTO);
-					this.getListaProduto().addAll(lista);
-				}
-			}
-		}
-		catch (Exception e) 
-		{
-			FacesMessage message = new FacesMessage(e.getMessage());
-	        message.setSeverity(FacesMessage.SEVERITY_ERROR);
-	        FacesContext.getCurrentInstance().addMessage(null, message);
-		}
-	}
+   public void inserir(ActionEvent event) 
+   {
+      try
+      {
+    	  if(validarAcesso(Variaveis.ACAO_INSERIR))
+    	  {
+    		  completarInserir();
+    		  PedidoDTO pedidoDTO = PedidoService.getInstancia().inserirPedido(getEntity());
+    		  FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Pedido inserido com sucesso. Protocolo do Pedido: "+ pedidoDTO.getIdPedido(), null));
+    		  
+    		  this.cancelar(event);
+    	  }
+      }
+      catch (Exception e)
+      {
+         FacesMessage message = new FacesMessage(e.getMessage());
+         message.setSeverity(FacesMessage.SEVERITY_ERROR);
+         if(e.getMessage() == null)
+        	 FacesContext.getCurrentInstance().addMessage("", message);
+         else
+        	 FacesContext.getCurrentInstance().addMessage(null, message);
+      }
+   }
 	
 	public void adicionarProduto(ActionEvent event)
 	{
@@ -593,8 +480,15 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 			//ADICIONANDO O PRODUTO
 			Produto produto = new Produto();
 			produto.setIdProduto(this.getProduto().getIdProduto());
-			produto = ProdutoService.getInstancia().get(produto, 0);
+			
+			Optional<Produto> produtoOptional = this.getListaProduto().stream()
+                    .filter(x -> x.getIdProduto() == this.getProduto().getIdProduto())
+                    .findFirst();
+			
+			produto.setValorUnitario(produtoOptional.get().getValorUnitario());
+			produto.setDesProduto(produtoOptional.get().getDesProduto());
 			produto.setQtdSolicitada(this.getQtdSolicitada());
+			produto.setFlgAtivo("S");
 			
 			this.getListaProdutoResult().add(0, produto);
 			this.getProduto().setIdProduto(null);
@@ -617,7 +511,7 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 			{
 				if(produto.getIdProduto().intValue() == this.getIdProdutoRemover().intValue())
 				{
-					this.getListaProdutoResult().remove(produto);
+					produto.setFlgAtivo("N");
 					return;
 				}
 			}
@@ -632,10 +526,13 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 			{
 				if(validarAcesso(Variaveis.ACAO_INATIVAR))
 				{
-					Pedido pedido = PedidoService.getInstancia().inativar(this.getPedido());
-					this.setPedido(pedido);
-					
-					FacesMessage message = new FacesMessage("Registro inativado com sucesso!");
+					PedidoDTO pedidoDTO = new PedidoDTO();
+					pedidoDTO.setCodigoPedidoIntegracao(getPedidoDTO().getCodigoPedidoIntegracao()); 
+					pedidoDTO.setCodigoPedido(getPedidoDTO().getCodigoPedido());
+					OmiePedidoService.getInstance().inativarPedido(this.getIdClienteSelecionado(), pedidoDTO);
+
+					this.setSearchResult(new ArrayList<>());
+					FacesMessage message = new FacesMessage("Pedido cancelado com sucesso!");
 					message.setSeverity(FacesMessage.SEVERITY_INFO);
 					FacesContext.getCurrentInstance().addMessage(null, message);
 				}
@@ -712,9 +609,14 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 	
 	public void buscarInformacoes() throws Exception {
 		if (this.getProduto().getIdProduto() != null && this.getProduto().getIdProduto().intValue() > 0) {
-			Produto produto = new Produto();
-			produto.setIdProduto(this.getProduto().getIdProduto());
-			produtoSelecionado = ProdutoService.getInstancia().get(produto, 0);
+			Optional<Produto> produtoOptional = this.getListaProduto().stream()
+					                                   .filter(x -> x.getIdProduto() == this.getProduto().getIdProduto())
+					                                   .findFirst();
+			
+			if (produtoOptional.isPresent()) {
+				produtoSelecionado = produtoOptional.get();
+			}
+					                                
 		} else {
 			setProdutoSelecionado(null);
 		}
@@ -886,5 +788,36 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 	public void setOpcaoEntrega(OpcaoEntrega opcaoEntrega) {
 		this.opcaoEntrega = opcaoEntrega;
 	}
-	
+
+	public PedidoDTO getPedidoDTO() {
+		return pedidoDTO;
+	}
+
+	public void setPedidoDTO(PedidoDTO pedidoDTO) {
+		this.pedidoDTO = pedidoDTO;
+	}
+
+	public BigInteger getIdCodigoPedidoSelecionado() {
+		return idCodigoPedidoSelecionado;
+	}
+
+	public void setIdCodigoPedidoSelecionado(BigInteger idCodigoPedidoSelecionado) {
+		this.idCodigoPedidoSelecionado = idCodigoPedidoSelecionado;
+	}
+
+	public BigInteger getIdCodigoPedidoIntegracaoSelecionado() {
+		return idCodigoPedidoIntegracaoSelecionado;
+	}
+
+	public void setIdCodigoPedidoIntegracaoSelecionado(BigInteger idCodigoPedidoIntegracaoSelecionado) {
+		this.idCodigoPedidoIntegracaoSelecionado = idCodigoPedidoIntegracaoSelecionado;
+	}
+
+	public BigInteger getIdClienteSelecionado() {
+		return idClienteSelecionado;
+	}
+
+	public void setIdClienteSelecionado(BigInteger idClienteSelecionado) {
+		this.idClienteSelecionado = idClienteSelecionado;
+	}
 }

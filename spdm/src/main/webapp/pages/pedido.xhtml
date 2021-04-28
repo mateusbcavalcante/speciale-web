@@ -21,6 +21,7 @@
 		<t:saveState value="#{crudBean.codigoProduto}" />		
 		<t:saveState value="#{crudBean.produto}" />
 		<t:saveState value="#{crudBean.pedido}" />
+		<t:saveState value="#{crudBean.pedidoDTO}" />
 		<t:saveState value="#{crudBean.listaProduto}" />
 		<t:saveState value="#{crudBean.listaOpcaoEntrega}" />
 		<t:saveState value="#{crudBean.listaProdutoResult}" />
@@ -32,7 +33,7 @@
 		<h:panelGroup id="panelGroupDePesquisa" style="height:100%;width:100%;" rendered="#{crudBean.searching}">
 			<f:subview id="viewBusca">
 				<div class="box-body">
-					<h:outputText value="Pelo menos um campo com * é obrigatório." style="color: #9e5d28"></h:outputText>
+					<h:outputText value="Os campos com * são obrigatórios." style="color: #9e5d28"></h:outputText>
 				</div>
 			
 				<div class="box-body">
@@ -46,7 +47,7 @@
                     </div>
 				
                     <div class="form-group">
-                   	   <label for="inputEmail3" class="col-sm-2 control-label">Data da Produção *</label>
+                   	   <label for="inputEmail3" class="col-sm-2 control-label">Data da Inclusão *</label>
 	                   <div class="col-sm-2" style="width: 13% !important; padding-right: 30px;">
 	                	  <rich:calendar value="#{crudBean.searchObject.datPedido}" buttonClass="glyphicon glyphicon-calendar" inputSize="9" buttonIcon="../images/calendar.png"  datePattern="dd/MM/yyyy" inputClass="form-control" showWeeksBar="false" enableManualInput="true" oninputkeypress="return formataData(event,this);" maxlength="10">
 	                	  	<a4j:ajax event="change" listener="#{crudBean.atualizarStringDataSearch}" render="panelGroupDePesquisa"/>
@@ -98,7 +99,7 @@
 		                  <label for="inputEmail3" class="col-sm-2 control-label">Protocolo: </label>
 		                  <div class="col-sm-10">
 				            	<div class="radio">
-									<h:outputText value="#{crudBean.pedido.idPedido}"  />
+									<h:outputText value="#{crudBean.entity.idPedido}"  />
 								</div>
 				            </div>
 		               	</div>
@@ -107,28 +108,10 @@
 		                  <label for="inputEmail3" class="col-sm-2 control-label">Data da Produção: </label>
 		                  <div class="col-sm-10">
 				            	<div class="radio">
-									<h:outputText value="#{crudBean.pedido.datPedido}" converter="converterData" />
+									<h:outputText value="#{crudBean.entity.datPedido}" converter="converterData" />
 								</div>
 				            </div>
 		               	</div>
-		               	
-		               	<div class="form-group">
-				        	<label for="inputEmail3" class="col-sm-2 control-label">Cliente: </label>
-				        	<div class="col-sm-10">
-				            	<div class="radio">
-									<h:outputText value="#{crudBean.pedido.cliente.desCliente}" />
-								</div>
-				            </div>
-				        </div>
-				    	
-				    	<div class="form-group">
-				        	<label for="inputEmail3" class="col-sm-2 control-label">Usuário de Cadastro: </label>
-				        	<div class="col-sm-10">
-				            	<div class="radio">
-									<h:outputText value="#{crudBean.pedido.usuarioCad.nome}" />
-								</div>
-				            </div>
-				        </div>
 	               	</h:panelGroup>
 	               	
 	               	<div class="form-group">
@@ -224,13 +207,13 @@
 											<rich:column style="width: 3%; text-align: center;" />
 										</rich:columnGroup>
 									</f:facet>
-									<rich:column style="text-align: right;">
+									<rich:column style="text-align: right;" rendered="#{rst.flgAtivo == 'S'}">
 										<h:outputText value="#{rst.idProduto}" />
 									</rich:column>
-									<rich:column style="text-align: left;">
+									<rich:column style="text-align: left;" rendered="#{rst.flgAtivo == 'S'}">
 										<h:outputText value="#{rst.desProduto}" />
 									</rich:column>
-									<rich:column style="text-align: center;">
+									<rich:column style="text-align: center;" rendered="#{rst.flgAtivo == 'S'}">
 										<h:inputText value="#{rst.qtdSolicitada}" style="width: 100px; height: 26px; display: initial;" styleClass="form-control" maxlength="5" onkeypress="return soNumero(event, this);"/>
 									</rich:column>									
 									<rich:column style="text-align: center; vertical-align: middle;">
@@ -261,21 +244,21 @@
 			        	Detalhes do Pedido
 			        	
 			        	<div style="float:right;">
-			        		<a4j:commandButton image="../images/edit.png" style="border:none; width: 20px; height: 20px;" title="ALTERAR" action="#{crudBean.preparaAlterar}" rendered="#{crudBean.pedido != null and crudBean.pedido.flgAtivo == 'S'}" render="formulario, panelTitle" />
+			        		<a4j:commandButton image="../images/edit.png" style="border:none; width: 20px; height: 20px;" title="ALTERAR" action="#{crudBean.preparaAlterar}" rendered="#{crudBean.pedidoDTO != null and crudBean.pedidoDTO.flgAtivo == 'S'}" render="formulario, panelTitle" />
 														
 							&nbsp;&nbsp;
 							
-			        		<a4j:commandButton image="../images/inativar.png" style="border:none; width: 20px; height: 20px;" title="INATIVAR" action="#{crudBean.inativar}" rendered="#{crudBean.pedido != null and crudBean.pedido.flgAtivo == 'S'}" render="formulario, panelTitle" onclick="if (!confirm('Deseja realmente inativar este registro?')) return false"/>
+			        		<a4j:commandButton image="../images/inativar.png" style="border:none; width: 20px; height: 20px;" title="INATIVAR" action="#{crudBean.inativar}" rendered="#{crudBean.pedidoDTO != null and crudBean.pedidoDTO.flgAtivo == 'S'}" render="formulario, panelTitle" onclick="if (!confirm('Deseja realmente cancelar este pedido?')) return false"/>
 								
 			        	</div>
 			     	</f:facet>
 			     	
-			     	<h:panelGroup id="panelPedidoPopulado" layout="block" rendered="#{crudBean.pedido != null}">
+			     	<h:panelGroup id="panelPedidoPopulado" layout="block" rendered="#{crudBean.pedidoDTO != null}">
 				     	<div class="form-group">
 				        	<label for="inputEmail3" class="col-sm-2 control-label">Protocolo: </label>
 				        	<div class="col-sm-10">
 				            	<div class="radio">
-									<h:outputText value="#{crudBean.pedido.idPedido}" />
+									<h:outputText value="#{crudBean.pedidoDTO.idPedido}" />
 								</div>
 				            </div>
 				        </div>
@@ -284,26 +267,17 @@
 				        	<label for="inputEmail3" class="col-sm-2 control-label">Data da Produção: </label>
 				        	<div class="col-sm-10">
 				            	<div class="radio">
-									<h:outputText value="#{crudBean.pedido.datPedido}" converter="converterData"/>
+									<h:outputText value="#{crudBean.pedidoDTO.dataPedido}" converter="converterData"/>
 								</div>
 				            </div>
 				        </div>
 				        
 				        <div class="form-group">
-				        	<label for="inputEmail3" class="col-sm-2 control-label">Situação: </label>
+				        	<label for="inputEmail3" class="col-sm-2 control-label">Cancelado: </label>
 				        	<div class="col-sm-10">
 				            	<div class="radio">
-									<h:outputText value="Ativo" rendered="#{crudBean.pedido.flgAtivo == 'S'}"/>
-									<h:outputText value="Inativo" rendered="#{crudBean.pedido.flgAtivo == 'N'}"/>
-								</div>
-				            </div>
-				        </div>
-				        
-				        <div class="form-group">
-				        	<label for="inputEmail3" class="col-sm-2 control-label">Opção de Entrega: </label>
-				        	<div class="col-sm-10">
-				            	<div class="radio">
-									<h:outputText value="#{crudBean.pedido.opcaoEntrega.desOpcaoEntrega}"/>
+									<h:outputText value="Não" rendered="#{crudBean.pedidoDTO.flgAtivo == 'S'}"/>
+									<h:outputText value="Sim" rendered="#{crudBean.pedidoDTO.flgAtivo == 'N'}"/>
 								</div>
 				            </div>
 				        </div>
@@ -312,37 +286,19 @@
 				        	<label for="inputEmail3" class="col-sm-2 control-label">Observação: </label>
 				        	<div class="col-sm-10">
 				            	<div class="radio">
-									<h:outputText value="#{crudBean.pedido.obsPedido}"/>
+									<h:outputText value="#{crudBean.pedidoDTO.observacao}"/>
 								</div>
 				            </div>
 				        </div>
-					
-						<div class="form-group">
-				        	<label for="inputEmail3" class="col-sm-2 control-label">Cliente: </label>
-				        	<div class="col-sm-10">
-				            	<div class="radio">
-									<h:outputText value="#{crudBean.pedido.cliente.desCliente}" />
-								</div>
-				            </div>
-				        </div>
-				    	
-				    	<div class="form-group">
-				        	<label for="inputEmail3" class="col-sm-2 control-label">Usuário de Cadastro: </label>
-				        	<div class="col-sm-10">
-				            	<div class="radio">
-									<h:outputText value="#{crudBean.pedido.usuarioCad.nome}" />
-								</div>
-				            </div>
-				        </div>				        		        
 				        
 	                	<div class="box-content">
 							<rich:dataTable id="tblData" 
-										 value="#{crudBean.pedido.listaPedidoProduto}" 
+										 value="#{crudBean.pedidoDTO.produtos}" 
 									       var="rst" rows="10"
 									styleClass="table table-bordered table-striped dataTable"
 							    onrowmouseover="this.style.cursor='default';this.style.backgroundColor='#FFF8DC';" 
 							  	 onrowmouseout="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"
-									  rendered="#{not empty crudBean.pedido.listaPedidoProduto}">						     
+									  rendered="#{not empty crudBean.pedidoDTO.produtos}">						     
 								<f:facet name="header">
 									<rich:columnGroup>
 										<rich:column style="width: 5%; text-align: left;" colspan="3">
@@ -360,10 +316,10 @@
 									</rich:columnGroup>
 								</f:facet>
 								<rich:column style="text-align: right;">
-									<h:outputText value="#{rst.produto.idProduto}" />
+									<h:outputText value="#{rst.idProduto}" />
 								</rich:column>
 								<rich:column style="text-align: left;">
-									<h:outputText value="#{rst.produto.desProduto}" />
+									<h:outputText value="#{rst.desProduto}" />
 								</rich:column>
 								<rich:column style="text-align: right;">
 									<h:outputText value="#{rst.qtdSolicitada}" />
@@ -373,7 +329,7 @@
 				        			        
 			        </h:panelGroup>
 			            
-					<h:panelGroup id="panelPedidoEmpty" layout="block" rendered="#{crudBean.pedido == null}">
+					<h:panelGroup id="panelPedidoEmpty" layout="block" rendered="#{crudBean.pedidoDTO == null}">
 						Não existe pedido para o filtro selecionado.
 					</h:panelGroup>
 				
