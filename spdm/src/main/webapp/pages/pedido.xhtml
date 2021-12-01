@@ -27,6 +27,7 @@
 		<t:saveState value="#{crudBean.listaProdutoResult}" />
 		<t:saveState value="#{crudBean.stringData}" />
 		<t:saveState value="#{crudBean.stringDataEntrega}" />
+		<t:saveState value="#{crudBean.informacao}" />
 	</ui:define>
 	
 	<ui:define name="content">
@@ -47,7 +48,7 @@
                     </div>
 				
                     <div class="form-group">
-                   	   <label for="inputEmail3" class="col-sm-2 control-label">Data da Inclusão *</label>
+                   	   <label for="inputEmail3" class="col-sm-2 control-label">Data do Pedido *</label>
 	                   <div class="col-sm-2" style="width: 13% !important; padding-right: 30px;">
 	                	  <rich:calendar value="#{crudBean.searchObject.datPedido}" buttonClass="glyphicon glyphicon-calendar" inputSize="9" buttonIcon="../images/calendar.png"  datePattern="dd/MM/yyyy" inputClass="form-control" showWeeksBar="false" enableManualInput="true" oninputkeypress="return formataData(event,this);" maxlength="10">
 	                	  	<a4j:ajax event="change" listener="#{crudBean.atualizarStringDataSearch}" render="panelGroupDePesquisa"/>
@@ -163,6 +164,10 @@
 	                 		<f:facet name="header">
 			                    <i class="fa fa-info-circle" aria-hidden="true"></i> Informações
 			                </f:facet>
+			                
+			                <div>
+			               		<h:outputText style="color: red" value="#{crudBean.informacao}" />
+			                </div>
 			                
 			                <div>
 			               		<label>Quantidade Lote Mínimo: </label>

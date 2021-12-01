@@ -23,6 +23,7 @@
 		<t:saveState value="#{crudBean.pedidoDTO}" />
 		<t:saveState value="#{crudBean.produtoSelecionado}" />
 		<t:saveState value="#{crudBean.listaOpcaoEntrega}" />
+		<t:saveState value="#{crudBean.informacao}" />
 	</ui:define>
 	
 	<ui:define name="content">
@@ -104,6 +105,10 @@
 	                 		<f:facet name="header">
 			                    <i class="fa fa-info-circle" aria-hidden="true"></i> Informações
 			                </f:facet>
+			                
+			                <div>
+			               		<h:outputText style="color: red" value="#{crudBean.informacao}" />
+			                </div>
 			                
 			                <div>
 			               		<label>Quantidade Lote Mínimo: </label>

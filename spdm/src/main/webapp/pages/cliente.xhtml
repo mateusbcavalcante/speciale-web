@@ -84,6 +84,13 @@
 			                     </h:inputText>
 			                   </div>
 		                 	</div>
+		                 	
+		                 	<div class="form-group">
+		                   	   <label for="inputEmail3" class="col-sm-2 control-label">Hora Limite *</label>
+			                   <div class="col-sm-2">
+			                     <h:inputText value="#{crudBean.entity.horLimite}" styleClass="form-control" maxlength="5" id="hrLim" onkeypress="javascript: mascara(this, mhor);"/>
+			                   </div>
+		                 	</div>
 		                </div>
 	                </rich:tab>
                 </rich:tabPanel>
@@ -110,8 +117,11 @@
 								<rich:column style="width: 20%; text-align: center;">
 									Código OMIE
 								</rich:column>
-								<rich:column style="width: 20%; text-align: center;">
+								<rich:column style="width: 10%; text-align: center;">
 									Código Tabela Preço OMIE
+								</rich:column>
+								<rich:column style="width: 10%; text-align: center;">
+									Hora Limite
 								</rich:column>
 								<rich:column style="width: 20%; text-align: center;">
 									Descrição
@@ -135,6 +145,11 @@
 						<rich:column style="text-align: center;">
 							<h:inputText value="#{rst.idTabelaPrecoOmie}" styleClass="form-control" maxlength="12" id="idTabelaPrecoOmie" onkeypress="return soNumero(event, this);">
 								<a4j:ajax event="blur" listener="#{crudBean.atualizarIdTabelaPrecoOmie(rst)}" execute="@form"/>
+		                    </h:inputText>
+	                    </rich:column>
+	                    <rich:column style="text-align: center;">
+							<h:inputText value="#{rst.horLimite}" styleClass="form-control" maxlength="5" id="hrLimTable" onkeypress="javascript: mascara(this, mhor);">
+								<a4j:ajax event="blur" listener="#{crudBean.atualizarHorLimite(rst)}" execute="@form"/>
 		                    </h:inputText>
 	                    </rich:column>
 						<rich:column style="text-align: left;">

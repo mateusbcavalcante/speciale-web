@@ -224,6 +224,20 @@ public class ClienteBean extends AbstractBean<Cliente, ClienteService>
 		}
 	}
 	
+	public void atualizarHorLimite(Cliente cliente) 
+	{
+		try 
+		{
+			ClienteService.getInstancia().atualizarHorLimite(cliente);
+		}
+		catch (Exception e) 
+		{
+			FacesMessage message = new FacesMessage(e.getMessage());
+	        message.setSeverity(FacesMessage.SEVERITY_ERROR);
+	        FacesContext.getCurrentInstance().addMessage(null, message);
+		}
+	}
+	
 	@Override
 	public void cancelar(ActionEvent event)
 	{

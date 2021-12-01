@@ -56,6 +56,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 	private BigInteger idProdutoRemover;
 	private String desClienteSelecionado;
 	private Date datPedidoSelecionada;
+	private String informacao;
 	
 	public GeradorPedidoBean()
 	{
@@ -129,28 +130,44 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 	}
 	
 	public void buscarProdutos() throws Exception {
+		this.setProdutoSelecionado(null);
+		this.setInformacao(null);
 		this.setProduto(new Produto());
 		this.iniciaListaProdutos();
 		
 		if (this.getEntity().getIdCliente() != null) 
 		{
-			List<ProdutoDTO> listaProduto = OmieProdutoService.getInstance().listarProdutosPorCliente(this.getEntity().getIdCliente());
+			Cliente cliente = new Cliente();
+			cliente.setFlgAtivo("S");
+			cliente.setIdCliente(this.getEntity().getIdCliente());
+			cliente = ClienteService.getInstancia().get(cliente, 0);
 			
-			if (listaProduto != null
-					&& listaProduto.size() > 0) {
-				for (ProdutoDTO element: listaProduto) { 
-					Produto produto = new Produto();
-					produto.setIdProduto(element.getIdProduto());
-					produto.setDesProduto(element.getDesProduto());
-					produto.setValorUnitario(element.getValorUnitario());
-					produto.setQtdLoteMinimo(element.getQtdLoteMinimo());
-					produto.setQtdMultiplo(element.getQtdMultiplo());
+			if (cliente != null) {
+				
+				if (cliente.getIdExternoOmie() == null || cliente.getIdExternoOmie().intValue() <= 0) {
+					this.setInformacao("O cliente selecionado não possui código externo.");
+				} else if (cliente.getIdTabelaPrecoOmie() == null || cliente.getIdTabelaPrecoOmie().intValue() <= 0) {
+					this.setInformacao("O cliente selecionado não possui tabela preço.");
+				} else {
+					List<ProdutoDTO> listaProduto = OmieProdutoService.getInstance().listarProdutosPorCliente(this.getEntity().getIdCliente());
 					
-					if (produto.getValorUnitario() != null 
-							&& produto.getValorUnitario().doubleValue() > 0) {
-						this.getListaProduto().add(produto);
+					if (listaProduto != null
+							&& listaProduto.size() > 0) {
+						for (ProdutoDTO element: listaProduto) { 
+							Produto produto = new Produto();
+							produto.setIdProduto(element.getIdProduto());
+							produto.setDesProduto(element.getDesProduto());
+							produto.setValorUnitario(element.getValorUnitario());
+							produto.setQtdLoteMinimo(element.getQtdLoteMinimo());
+							produto.setQtdMultiplo(element.getQtdMultiplo());
+							
+							this.getListaProduto().add(produto);
+						}
+					} else {
+						this.setInformacao("O cliente selecionado não tem produto vinculado.");
 					}
 				}
+			
 			}
 		}
 	}
@@ -167,6 +184,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 	}
 	
 	public void buscarInformacoes() throws Exception {
+		this.setInformacao(null);
 		if (this.getProduto().getIdProduto() != null && this.getProduto().getIdProduto().intValue() > 0) {
 			Optional<Produto> produtoOptional = this.getListaProduto().stream()
 					                                   .filter(x -> x.getIdProduto() == this.getProduto().getIdProduto())
@@ -174,6 +192,10 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 			
 			if (produtoOptional.isPresent()) {
 				produtoSelecionado = produtoOptional.get();
+				
+				if (produtoSelecionado.getValorUnitario() == null || produtoSelecionado.getValorUnitario() <= 0) {
+					this.setInformacao("O produto selecionado não tem valor unitário.");
+				}
 			}
 					                                
 		} else {
@@ -352,6 +374,11 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 	{
 		try
 		{
+			if(this.getInformacao() != null
+					&& !this.getInformacao().equalsIgnoreCase(""))
+			{
+				throw new Exception("Não é possível adicionar o produto, pois existe pendência de cadastro!");			
+			}
 			Boolean existeCliente = false;
 			//CLIENTE, PRODUTO E QUANTIDADE OBRIGATORIOS
 			if(this.getEntity().getIdCliente() == null
@@ -755,5 +782,13 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 
 	public void setPedidoDTO(PedidoDTO pedidoDTO) {
 		this.pedidoDTO = pedidoDTO;
+	}
+
+	public String getInformacao() {
+		return informacao;
+	}
+
+	public void setInformacao(String informacao) {
+		this.informacao = informacao;
 	}
 }
