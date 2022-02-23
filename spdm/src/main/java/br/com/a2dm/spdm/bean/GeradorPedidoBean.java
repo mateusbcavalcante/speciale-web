@@ -206,14 +206,17 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 	@Override
 	protected void validarPesquisar() throws Exception
 	{
+		if (this.getSearchObject().getIdCliente() == null
+				|| this.getSearchObject().getIdCliente().intValue() <= 0) {
+			throw new Exception("O campo Cliente é obrigatório!");
+		}
+		
 		if((this.getSearchObject().getIdPedido() == null
 				|| this.getSearchObject().getIdPedido().intValue() <= 0)
-				|| (this.getSearchObject().getIdCliente() == null
-						|| this.getSearchObject().getIdCliente().intValue() <= 0)
-				|| (this.getSearchObject().getDatPedido() == null
+				&& (this.getSearchObject().getDatPedido() == null
 					|| this.getSearchObject().getDatPedido().toString().trim().equals("")))
 		{
-			throw new Exception("Os campos com * são obrigatórios!");
+			throw new Exception("Pelo menos um dos campos com ** é obrigatório!");
 		}
 	}
 	
@@ -317,8 +320,11 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 			{
 				validarPesquisar();
 				completarPesquisar();
-				validarCampoTexto();
-				String dateStr = DateUtils.formatDate(this.getSearchObject().getDatPedido(),"yyyy-MM-dd");
+
+				String dateStr = "";
+				if (this.getSearchObject().getDatPedido() != null) {					
+					dateStr = DateUtils.formatDate(this.getSearchObject().getDatPedido(),"yyyy-MM-dd");
+				}
 				PedidoDTO pedidoDTO = OmiePedidoService.getInstance().pesquisarPedido(this.getSearchObject().getIdCliente(), 
 																					  this.getSearchObject().getIdPedido(), 
 																					  dateStr);

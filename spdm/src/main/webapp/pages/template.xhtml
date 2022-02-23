@@ -161,7 +161,14 @@
 		                				<i class="fa fa-user-secret"></i> 
 		                				Cliente
 	                				</h:commandLink>
-                				</li>		                
+                				</li>		
+                				
+                				<li class="#{sessionScope.flgMenuManUsr}">
+		                			<h:commandLink action="#{feriadoBean.preparaPesquisar}">
+		                				<i class="fa fa-calendar"></i> 
+		                				Feriado
+	                				</h:commandLink>
+                				</li>                
 			                </h:panelGroup>
 			              </ul>
 			            </li>

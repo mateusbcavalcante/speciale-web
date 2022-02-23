@@ -28,6 +28,7 @@
 		<t:saveState value="#{crudBean.stringData}" />
 		<t:saveState value="#{crudBean.stringDataEntrega}" />
 		<t:saveState value="#{crudBean.informacao}" />
+		<t:saveState value="#{crudBean.produtoSelecionado}" />
 	</ui:define>
 	
 	<ui:define name="content">
@@ -76,8 +77,8 @@
 		                  <label for="inputEmail3" class="col-sm-2 control-label">Data da Produção *</label>
 		                  <div class="col-sm-2" style="width: 13% !important; padding-right: 30px;">
 			               	  <rich:calendar value="#{crudBean.entity.datPedido}" buttonClass="glyphicon glyphicon-calendar" inputSize="9" buttonIcon="../images/calendar.png"  datePattern="dd/MM/yyyy" inputClass="form-control" showWeeksBar="false" enableManualInput="true" oninputkeypress="return formataData(event,this);" maxlength="10">
-			               	  	<a4j:ajax event="change" listener="#{crudBean.atualizarStringDataInsert}" render="panelEntrega"/>
-		                	  	<a4j:ajax event="inputchange" listener="#{crudBean.atualizarStringDataInsert}" render="panelEntrega"/>
+			               	  	<a4j:ajax event="change" listener="#{crudBean.atualizarStringDataInsert}" render="panelGroupDeInserir, panelEntrega"/>
+		                	  	<a4j:ajax event="inputchange" listener="#{crudBean.atualizarStringDataInsert}" render="panelGroupDeInserir, panelEntrega"/>
 			               	  </rich:calendar>
 		                  </div>
 		               	  <label for="inputEmail3" class="col-sm-2 control-label" style="text-align: left; color: #800000">

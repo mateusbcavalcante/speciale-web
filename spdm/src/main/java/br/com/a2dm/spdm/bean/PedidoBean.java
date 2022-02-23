@@ -495,6 +495,18 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 				throw new Exception("O campo Quantidade é obrigatório!");			
 			}
 			
+			if (!PedidoService.getInstancia().isClienteEvento()) {
+				if (produtoSelecionado.getQtdLoteMinimo().intValue() > this.getQtdSolicitada().intValue())
+				{
+					throw new Exception("O Lote Mínimo do produto " + produtoSelecionado.getDesProduto() + " não foi atingido! Quantidade de Lote Mínimo: " + produtoSelecionado.getQtdLoteMinimo());
+				}
+				
+				if (this.getQtdSolicitada().intValue() % produtoSelecionado.getQtdMultiplo().intValue() != 0)
+				{
+					throw new Exception("A Quantidade do produto " + produtoSelecionado.getDesProduto() + " deve ser solicitada em múltiplo de "+ produtoSelecionado.getQtdMultiplo() +"!");
+				}
+			}
+			
 			//VALIDAR PRODUTO EXISTENTE
 			if(this.listaProdutoResult == null)
 			{

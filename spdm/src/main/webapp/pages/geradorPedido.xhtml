@@ -35,15 +35,6 @@
 			
 				<div class="box-body">
 					<div class="form-group">
-                      <label for="inputEmail3" class="col-sm-2 control-label">Protocolo *</label>
-                      <div class="col-sm-2">
-                        <h:inputText value="#{crudBean.searchObject.idPedido}" styleClass="form-control" maxlength="50" id="protocolo">
-                        	<f:passThroughAttribute name="placeholder" value="Protocolo"/>
-                        </h:inputText>
-                      </div>
-                    </div>
-				
-                    <div class="form-group">
                       <label for="inputEmail3" class="col-sm-2 control-label">Cliente *</label>
                       <div class="col-sm-2" style="width: 13% !important;">
 	                  	<h:selectOneMenu value="#{crudBean.searchObject.idCliente}" converter="simpleIndexConverter" styleClass="form-control" style="width:310px; display: initial;">								
@@ -52,8 +43,17 @@
 	                  </div>
                     </div>
                     
+					<div class="form-group">
+                      <label for="inputEmail3" class="col-sm-2 control-label">Protocolo **</label>
+                      <div class="col-sm-2">
+                        <h:inputText value="#{crudBean.searchObject.idPedido}" styleClass="form-control" maxlength="50" id="protocolo">
+                        	<f:passThroughAttribute name="placeholder" value="Protocolo"/>
+                        </h:inputText>
+                      </div>
+                    </div>
+                    
                     <div class="form-group">
-                      <label for="inputEmail3" class="col-sm-2 control-label">Data da Inclusão * </label>
+                      <label for="inputEmail3" class="col-sm-2 control-label">Data do Pedido **</label>
                       <div class="col-sm-2" style="width: 13% !important;">
 	                	  <rich:calendar value="#{crudBean.searchObject.datPedido}" buttonClass="glyphicon glyphicon-calendar" inputSize="9" buttonIcon="../images/calendar.png"  datePattern="dd/MM/yyyy" inputClass="form-control" showWeeksBar="false" enableManualInput="true" oninputkeypress="return formataData(event,this);" maxlength="10"/>
 	                  </div>
