@@ -184,7 +184,9 @@
 												 <h:outputText value="#{rstProduto.desProduto}"/>
 											</rich:column>
 											<rich:column style="text-align: left;" rendered="#{rstProduto.flgAtivo == 'S'}">
-												 <h:outputText value="#{rstProduto.qtdSolicitada}"/>
+												<h:inputText value="#{rstProduto.qtdSolicitada}" styleClass="form-control" maxlength="5" onkeypress="return soNumero(event, this);">
+													<a4j:ajax event="blur" listener="#{crudBean.validarQtdSolicitada(rstProduto)}" execute="@form"/>
+							                    </h:inputText>
 											</rich:column>
 											<rich:column style="text-align: left;" rendered="#{rstProduto.flgAtivo == 'S'}">
 												 <a4j:commandButton image="../images/inativar.png" style="border:none; width: 18px; height: 18px;" title="EXCLUIR" action="#{crudBean.removerProduto}" render="panelProdutoResult,tblDataProduto">
@@ -201,9 +203,11 @@
 									
 									<rich:column style="text-align: left;">
 					                   <div class="col-sm-2">
-					                   	  <h:selectOneMenu id="compOpcaoEntrega" value="#{rst.idOpcaoEntrega}" converter="simpleIndexConverter" styleClass="form-control" style="width:250px; display: initial;">								
-											<t:selectItems var="o" itemValue="#{o.idOpcaoEntrega}" itemLabel="#{o.desOpcaoEntrega}" value="#{crudBean.listaOpcaoEntrega}" />
-										  </h:selectOneMenu>
+					                   	  <h:selectOneMenu value="#{rst.idOpcaoEntrega}"> 
+					                   	    <f:selectItem itemValue="#{null}" itemLabel="Escolha a Opção de Entrega" />
+										   	<f:selectItem itemValue="2" itemLabel="Entrega" /> 
+										   	<f:selectItem itemValue="1" itemLabel="Retirada" /> 
+										  </h:selectOneMenu> 
 					                   </div>
 				                 	</rich:column>
 								</rich:dataTable>

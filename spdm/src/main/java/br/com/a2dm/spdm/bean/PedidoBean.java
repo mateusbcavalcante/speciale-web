@@ -104,9 +104,9 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 		cliente.setIdCliente(util.getUsuarioLogado().getIdCliente());
 		cliente = ClienteService.getInstancia().get(cliente, 0);
 		
-		if (cliente.getIdExternoOmie() == null || cliente.getIdExternoOmie().intValue() <= 0) {
+		if (cliente.getIdExternoOmie() == null) {
 			this.setInformacao("O cliente selecionado não possui código externo.");
-		} else if (cliente.getIdTabelaPrecoOmie() == null || cliente.getIdTabelaPrecoOmie().intValue() <= 0) {
+		} else if (cliente.getIdTabelaPrecoOmie() == null) {
 			this.setInformacao("O cliente selecionado não possui tabela preço.");
 		} else {
 			produto.setFiltroMap(new HashMap<String, Object>());
@@ -152,9 +152,9 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 			
 			if (cliente != null) {
 				
-				if (cliente.getIdExternoOmie() == null || cliente.getIdExternoOmie().intValue() <= 0) {
+				if (cliente.getIdExternoOmie() == null) {
 					this.setInformacao("O cliente selecionado não possui código externo.");
-				} else if (cliente.getIdTabelaPrecoOmie() == null || cliente.getIdTabelaPrecoOmie().intValue() <= 0) {
+				} else if (cliente.getIdTabelaPrecoOmie() == null) {
 					this.setInformacao("O cliente selecionado não possui tabela preço.");
 				} else {
 					List<ProdutoDTO> listaProduto = OmieProdutoService.getInstance().listarProdutosPorCliente(this.getEntity().getIdCliente());
@@ -375,7 +375,7 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 	protected void validarPesquisar() throws Exception
 	{
 		if((this.getSearchObject().getIdPedido() == null
-				|| this.getSearchObject().getIdPedido().intValue() <= 0)
+				|| this.getSearchObject().getIdPedido().longValue() <= 0)
 				&& (this.getSearchObject().getDatPedido() == null
 					|| this.getSearchObject().getDatPedido().toString().trim().equals("")))
 		{
@@ -483,8 +483,7 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 			
 			//PRODUTO E QUANTIDADE OBRIGATORIOS
 			if(this.getProduto() == null
-					|| this.getProduto().getIdProduto() == null
-					|| this.getProduto().getIdProduto().intValue() <= 0)
+					|| this.getProduto().getIdProduto() == null)
 			{
 				throw new Exception("O campo Produto é obrigatório!");			
 			}
@@ -516,7 +515,7 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 			{
 				for (Produto produto : listaProdutoResult)
 				{
-					if(this.getProduto().getIdProduto().intValue() == produto.getIdProduto().intValue())
+					if(this.getProduto().getIdProduto().longValue() == produto.getIdProduto().longValue())
 					{
 						throw new Exception("Este produto já está adicionado na lista!");
 					}
@@ -555,7 +554,7 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 		{
 			for (Produto produto : listaProdutoResult)
 			{
-				if(produto.getIdProduto().intValue() == this.getIdProdutoRemover().intValue())
+				if(produto.getIdProduto().longValue() == this.getIdProdutoRemover().longValue())
 				{
 					produto.setFlgAtivo("N");
 					return;
@@ -655,7 +654,7 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 	
 	public void buscarInformacoes() throws Exception {
 		this.setInformacao(null);
-		if (this.getProduto().getIdProduto() != null && this.getProduto().getIdProduto().intValue() > 0) {
+		if (this.getProduto().getIdProduto() != null && this.getProduto().getIdProduto().longValue() > 0) {
 			Optional<Produto> produtoOptional = this.getListaProduto().stream()
 					                                   .filter(x -> x.getIdProduto() == this.getProduto().getIdProduto())
 					                                   .findFirst();

@@ -144,9 +144,9 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 			
 			if (cliente != null) {
 				
-				if (cliente.getIdExternoOmie() == null || cliente.getIdExternoOmie().intValue() <= 0) {
+				if (cliente.getIdExternoOmie() == null) {
 					this.setInformacao("O cliente selecionado não possui código externo.");
-				} else if (cliente.getIdTabelaPrecoOmie() == null || cliente.getIdTabelaPrecoOmie().intValue() <= 0) {
+				} else if (cliente.getIdTabelaPrecoOmie() == null) {
 					this.setInformacao("O cliente selecionado não possui tabela preço.");
 				} else {
 					List<ProdutoDTO> listaProduto = OmieProdutoService.getInstance().listarProdutosPorCliente(this.getEntity().getIdCliente());
@@ -185,7 +185,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 	
 	public void buscarInformacoes() throws Exception {
 		this.setInformacao(null);
-		if (this.getProduto().getIdProduto() != null && this.getProduto().getIdProduto().intValue() > 0) {
+		if (this.getProduto().getIdProduto() != null && this.getProduto().getIdProduto().longValue() > 0) {
 			Optional<Produto> produtoOptional = this.getListaProduto().stream()
 					                                   .filter(x -> x.getIdProduto() == this.getProduto().getIdProduto())
 					                                   .findFirst();
@@ -203,20 +203,102 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 		}
 	}
 	
+	public void setarOpcaoEntrega(Pedido pedido) {
+		if (getListaPedidoResult() != null && getListaPedidoResult().size() > 0) {
+			for (Pedido element : getListaPedidoResult()) {
+		        if (element.getCliente().getIdCliente().equals(pedido.getCliente().getIdCliente())) {
+		        	element.setIdOpcaoEntrega(pedido.getIdOpcaoEntrega());
+		            break;
+		        }
+		    }
+		}
+	}
+	
 	@Override
 	protected void validarPesquisar() throws Exception
 	{
 		if (this.getSearchObject().getIdCliente() == null
-				|| this.getSearchObject().getIdCliente().intValue() <= 0) {
+				|| this.getSearchObject().getIdCliente().longValue() <= 0) {
 			throw new Exception("O campo Cliente é obrigatório!");
 		}
 		
 		if((this.getSearchObject().getIdPedido() == null
-				|| this.getSearchObject().getIdPedido().intValue() <= 0)
+				|| this.getSearchObject().getIdPedido().longValue() <= 0)
 				&& (this.getSearchObject().getDatPedido() == null
 					|| this.getSearchObject().getDatPedido().toString().trim().equals("")))
 		{
 			throw new Exception("Pelo menos um dos campos com ** é obrigatório!");
+		}
+	}
+	
+	public void recuperarUltimoPedido(ActionEvent event) throws Exception {
+		
+		try
+		{
+			if(this.getEntity().getDatUltimoPedido() == null
+					|| this.getEntity().getDatUltimoPedido().toString().trim().equals(""))
+			{
+				throw new Exception("O campo Data do Último Pedido é obrigatório!");
+			}
+			
+			String dateStr = "";
+			if (this.getEntity().getDatUltimoPedido() != null) {
+				dateStr = DateUtils.formatDate(this.getEntity().getDatUltimoPedido(),"yyyy-MM-dd");
+			}
+			PedidoDTO pedidoDTO = OmiePedidoService.getInstance().pesquisarPedido(this.getEntity().getIdCliente(), 
+																				  null, 
+																				  dateStr);
+			
+			if (pedidoDTO != null) {
+				
+				Pedido pedido = new Pedido();
+				pedido.setFlgAtivo("S");
+				pedido.setObsPedido(pedidoDTO.getObservacao());
+				pedido.setIdOpcaoEntrega(pedidoDTO.getIdOpcaoEntrega());
+				
+				Cliente cliente = new Cliente();
+				cliente.setIdCliente(pedidoDTO.getIdCliente());
+				cliente = ClienteService.getInstancia().get(cliente, 0);
+				pedido.setCliente(cliente);
+				pedido.getCliente().setListaProduto(new ArrayList<>());
+				
+				if (pedidoDTO.getProdutos() != null
+						&& pedidoDTO.getProdutos().size() > 0) { 
+					for (ProdutoDTO element: pedidoDTO.getProdutos()) {
+						Produto produto = new Produto();
+						produto.setIdProduto(element.getIdProduto());
+						produto.setDesProduto(element.getDesProduto());
+						produto.setValorUnitario(element.getValorUnitario());
+						produto.setFlgAtivo("S");
+						produto.setQtdSolicitada(element.getQtdSolicitada());
+						pedido.getCliente().getListaProduto().add(produto);
+					}
+				}
+				
+				if (this.getListaPedidoResult() == null
+						|| this.getListaPedidoResult().size() <= 0) {					
+					this.setListaPedidoResult(new ArrayList<>());
+				}
+				
+				this.getListaPedidoResult().add(0, pedido);
+				
+				getEntity().setIdCliente(pedidoDTO.getIdCliente());
+				
+				// SETANDO LISTA DE OPCAO DE ENTREGA
+				OpcaoEntrega opcaoEntrega = new OpcaoEntrega();
+				opcaoEntrega.setFlgAtivo("S");
+				
+				List<OpcaoEntrega> listaOpcaoEntrega = OpcaoEntregaService.getInstancia().pesquisar(opcaoEntrega, 0);
+				this.iniciaListaOpcaoEntrega();
+				this.getListaOpcaoEntrega().addAll(listaOpcaoEntrega);
+				
+			} else {
+				throw new Exception("Nenhum pedido para a data informada!");
+			}
+		}
+		catch (Exception e)
+		{
+			throw e;
 		}
 	}
 	
@@ -387,15 +469,13 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 			}
 			Boolean existeCliente = false;
 			//CLIENTE, PRODUTO E QUANTIDADE OBRIGATORIOS
-			if(this.getEntity().getIdCliente() == null
-					|| this.getEntity().getIdCliente().intValue() <= 0)
+			if(this.getEntity().getIdCliente() == null)
 			{
 				throw new Exception("O campo Cliente é obrigatório!");			
 			}
 			
 			if(this.getProduto() == null
-					|| this.getProduto().getIdProduto() == null
-					|| this.getProduto().getIdProduto().intValue() <= 0)
+					|| this.getProduto().getIdProduto() == null)
 			{
 				throw new Exception("O campo Produto é obrigatório!");			
 			}
@@ -406,14 +486,16 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 				throw new Exception("O campo Quantidade é obrigatório!");			
 			}
 			
-			if(produtoSelecionado.getQtdLoteMinimo().intValue() > getQtdSolicitada().intValue())
-			{
-				throw new Exception("O Lote Mínimo do produto " + produtoSelecionado.getDesProduto() + " não foi atingida! Quantidade de Lote Mínimo: " + produtoSelecionado.getQtdLoteMinimo());
-			}
-			
-			if(getQtdSolicitada().intValue() % produtoSelecionado.getQtdMultiplo().intValue() != 0)
-			{
-				throw new Exception("A Quantidade do produto " + produtoSelecionado.getDesProduto() + " deve ser solicitada em múltiplo de "+ produtoSelecionado.getQtdMultiplo() +"!");
+			if (!PedidoService.getInstancia().isClienteEvento(this.getEntity().getIdCliente())) {
+				if(produtoSelecionado.getQtdLoteMinimo().intValue() > getQtdSolicitada().intValue())
+				{
+					throw new Exception("O Lote Mínimo do produto " + produtoSelecionado.getDesProduto() + " não foi atingida! Quantidade de Lote Mínimo: " + produtoSelecionado.getQtdLoteMinimo());
+				}
+				
+				if(getQtdSolicitada().intValue() % produtoSelecionado.getQtdMultiplo().intValue() != 0)
+				{
+					throw new Exception("A Quantidade do produto " + produtoSelecionado.getDesProduto() + " deve ser solicitada em múltiplo de "+ produtoSelecionado.getQtdMultiplo() +"!");
+				}
 			}
 			
 			//VALIDAR PRODUTO EXISTENTE
@@ -425,11 +507,11 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 			{
 				for (Pedido element : listaPedidoResult)
 				{
-					if(element.getCliente().getIdCliente().intValue() == this.getEntity().getIdCliente().intValue())
+					if(element.getCliente().getIdCliente().longValue() == this.getEntity().getIdCliente().longValue())
 					{
 						existeCliente = true;
 						for (Produto elementProduto : element.getCliente().getListaProduto()) {
-							if (elementProduto.getIdProduto().intValue() == produto.getIdProduto().intValue()) {
+							if (elementProduto.getIdProduto().longValue() == produto.getIdProduto().longValue()) {
 								if (elementProduto.getFlgAtivo().equalsIgnoreCase("S")) {
 									throw new Exception("Este produto já está adicionado na lista para o cliente selecionado!");
 								} else {
@@ -487,7 +569,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 				}
 				pedido.getCliente().getListaProduto().add(produto);
 			
-				this.getListaPedidoResult().add(0, pedido);
+				this.getListaPedidoResult().add(pedido);
 			}
 			this.getProduto().setIdProduto(null);
 			this.setQtdSolicitada(null);
@@ -530,10 +612,70 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 				throw new Exception("No pedido do cliente " + element.getCliente().getDesCliente() + ", o campo Data da Produção é obrigatório!");
 			}
 			
-			if(element.getDatPedido().before(dataHoje))
+			if (element.getDatPedido().before(dataHoje))
 			{
 				throw new Exception("No pedido do cliente " + element.getCliente().getDesCliente() + ", o campo Data da Produção não pode ser menor que a Data Atual!");
 			}
+			
+
+			if (element.getCliente().getListaProduto() != null) {
+				for (Produto elementClienteProduto : element.getCliente().getListaProduto()) {
+					
+					Optional<Produto> produtoOptional = this.getListaProduto().stream()
+							.filter(x -> x.getIdProduto() == elementClienteProduto.getIdProduto())
+							.findFirst();
+					
+					if (produtoOptional.isPresent()) {
+						Produto produtoAtual = produtoOptional.get();
+						
+						if(elementClienteProduto.getQtdSolicitada() == null
+								|| elementClienteProduto.getQtdSolicitada().intValue() <= 0)
+						{
+							throw new Exception("O campo Quantidade do produto " + produtoAtual.getDesProduto() + " é obrigatório!");			
+						}
+						
+						if(produtoAtual.getQtdLoteMinimo().intValue() > elementClienteProduto.getQtdSolicitada().intValue())
+						{
+							throw new Exception("O Lote Mínimo do produto " + produtoAtual.getDesProduto() + " não foi atingida! Quantidade de Lote Mínimo: " + produtoAtual.getQtdLoteMinimo());
+						}
+						
+						if(elementClienteProduto.getQtdSolicitada().intValue() % produtoAtual.getQtdMultiplo().intValue() != 0)
+						{
+							throw new Exception("A Quantidade do produto " + produtoAtual.getDesProduto() + " deve ser solicitada em múltiplo de "+ produtoAtual.getQtdMultiplo() +"!");
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	public void validarQtdSolicitada(Produto produto) 
+	{
+		try 
+		{
+			Optional<Produto> produtoOptional = this.getListaProduto().stream()
+                    .filter(x -> x.getIdProduto() == produto.getIdProduto())
+                    .findFirst();
+
+			if (produtoOptional.isPresent()) {
+				Produto produtoAtual = produtoOptional.get();
+					
+				if(produtoAtual.getQtdLoteMinimo().intValue() > produto.getQtdSolicitada().intValue())
+				{
+					throw new Exception("O Lote Mínimo do produto " + produtoAtual.getDesProduto() + " não foi atingida! Quantidade de Lote Mínimo: " + produtoAtual.getQtdLoteMinimo());
+				}
+				
+				if(produto.getQtdSolicitada().intValue() % produtoAtual.getQtdMultiplo().intValue() != 0)
+				{
+					throw new Exception("A Quantidade do produto " + produtoAtual.getDesProduto() + " deve ser solicitada em múltiplo de "+ produtoAtual.getQtdMultiplo() +"!");
+				}
+			}
+		}
+		catch (Exception e) 
+		{
+			FacesMessage message = new FacesMessage(e.getMessage());
+	        message.setSeverity(FacesMessage.SEVERITY_ERROR);
+	        FacesContext.getCurrentInstance().addMessage(null, message);
 		}
 	}
 	
@@ -597,7 +739,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 		{
 			for (Pedido element : listaPedidoResult)
 			{
-				if(element.getCliente().getIdCliente().intValue() == this.getIdClienteRemover().intValue())
+				if(element.getCliente().getIdCliente().longValue() == this.getIdClienteRemover().longValue())
 				{
 					this.getListaPedidoResult().remove(element);
 					return;
@@ -610,10 +752,10 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 	{
 		for (Pedido element : listaPedidoResult)
 		{
-			if(element.getCliente().getIdCliente().intValue() == this.getIdClienteRemover().intValue())
+			if(element.getCliente().getIdCliente().longValue() == this.getIdClienteRemover().longValue())
 			{
 				for (Produto elementProduto : element.getCliente().getListaProduto()) {
-					if(elementProduto.getIdProduto().intValue() == this.getIdProdutoRemover().intValue()) 
+					if(elementProduto.getIdProduto().longValue() == this.getIdProdutoRemover().longValue()) 
 					{
 						elementProduto.setFlgAtivo("N");
 						break;

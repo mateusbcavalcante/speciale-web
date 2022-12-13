@@ -222,7 +222,7 @@ public class UsuarioBean extends AbstractBean<Usuario, UsuarioService>
 				}
 				
 				if(usuario.getIdCliente() != null
-						&& usuario.getIdCliente().intValue() > 0)
+						&& usuario.getIdCliente().longValue() > 0)
 				{
 					this.setFlgVisualizarCliente("S");
 				}
@@ -334,7 +334,7 @@ public class UsuarioBean extends AbstractBean<Usuario, UsuarioService>
 			if(usuario != null)
 			{
 				if(usuario.getIdCliente() != null
-						&& usuario.getIdCliente().intValue() > 0)
+						&& usuario.getIdCliente().longValue() > 0)
 				{
 					Cliente cliente = new Cliente();
 					cliente.setIdCliente(usuario.getIdCliente());

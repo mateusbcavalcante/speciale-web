@@ -10,7 +10,20 @@
 				xmlns:mj="http://mojarra.dev.java.net/mojarra_ext"
 				xmlns:t="http://myfaces.apache.org/tomahawk"
 				template="template.xhtml">
-				
 	
-			
+	<ui:define name="content">
+		<h:panelGroup id="panelGroupDePesquisa" style="height:100%;width:100%;">
+			<f:subview id="viewBusca">
+				<div class="box-body">
+					<i class="fa fa-info-circle" aria-hidden="true"></i> Aviso
+					<br/><br/>
+					
+					<h:outputText value="INFORMAMOS QUE SÁBADO, 17/12/2022, NÃO ESTAREMOS FUNCIONANDO." style="color: red"></h:outputText>
+					<br/>
+					<h:outputText value="QUALQUER DÚVIDA, ENTRAR EM CONTATO COM O COMERCIAL." style="color: red"></h:outputText>
+				</div>
+			</f:subview>
+		</h:panelGroup>
+	</ui:define>
+				
 </ui:composition>
