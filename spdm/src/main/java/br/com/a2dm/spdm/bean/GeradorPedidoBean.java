@@ -486,17 +486,17 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 				throw new Exception("O campo Quantidade é obrigatório!");			
 			}
 			
-			if (!PedidoService.getInstancia().isClienteEvento(this.getEntity().getIdCliente())) {
-				if(produtoSelecionado.getQtdLoteMinimo().intValue() > getQtdSolicitada().intValue())
-				{
-					throw new Exception("O Lote Mínimo do produto " + produtoSelecionado.getDesProduto() + " não foi atingida! Quantidade de Lote Mínimo: " + produtoSelecionado.getQtdLoteMinimo());
-				}
-				
-				if(getQtdSolicitada().intValue() % produtoSelecionado.getQtdMultiplo().intValue() != 0)
-				{
-					throw new Exception("A Quantidade do produto " + produtoSelecionado.getDesProduto() + " deve ser solicitada em múltiplo de "+ produtoSelecionado.getQtdMultiplo() +"!");
-				}
-			}
+//			if (!PedidoService.getInstancia().isClienteEvento(this.getEntity().getIdCliente())) {
+//				if(produtoSelecionado.getQtdLoteMinimo().intValue() > getQtdSolicitada().intValue())
+//				{
+//					throw new Exception("O Lote Mínimo do produto " + produtoSelecionado.getDesProduto() + " não foi atingida! Quantidade de Lote Mínimo: " + produtoSelecionado.getQtdLoteMinimo());
+//				}
+//				
+//				if(getQtdSolicitada().intValue() % produtoSelecionado.getQtdMultiplo().intValue() != 0)
+//				{
+//					throw new Exception("A Quantidade do produto " + produtoSelecionado.getDesProduto() + " deve ser solicitada em múltiplo de "+ produtoSelecionado.getQtdMultiplo() +"!");
+//				}
+//			}
 			
 			//VALIDAR PRODUTO EXISTENTE
 			if(this.listaPedidoResult == null)
@@ -618,34 +618,34 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 			}
 			
 
-			if (element.getCliente().getListaProduto() != null) {
-				for (Produto elementClienteProduto : element.getCliente().getListaProduto()) {
-					
-					Optional<Produto> produtoOptional = this.getListaProduto().stream()
-							.filter(x -> x.getIdProduto() == elementClienteProduto.getIdProduto())
-							.findFirst();
-					
-					if (produtoOptional.isPresent()) {
-						Produto produtoAtual = produtoOptional.get();
-						
-						if(elementClienteProduto.getQtdSolicitada() == null
-								|| elementClienteProduto.getQtdSolicitada().intValue() <= 0)
-						{
-							throw new Exception("O campo Quantidade do produto " + produtoAtual.getDesProduto() + " é obrigatório!");			
-						}
-						
-						if(produtoAtual.getQtdLoteMinimo().intValue() > elementClienteProduto.getQtdSolicitada().intValue())
-						{
-							throw new Exception("O Lote Mínimo do produto " + produtoAtual.getDesProduto() + " não foi atingida! Quantidade de Lote Mínimo: " + produtoAtual.getQtdLoteMinimo());
-						}
-						
-						if(elementClienteProduto.getQtdSolicitada().intValue() % produtoAtual.getQtdMultiplo().intValue() != 0)
-						{
-							throw new Exception("A Quantidade do produto " + produtoAtual.getDesProduto() + " deve ser solicitada em múltiplo de "+ produtoAtual.getQtdMultiplo() +"!");
-						}
-					}
-				}
-			}
+//			if (element.getCliente().getListaProduto() != null) {
+//				for (Produto elementClienteProduto : element.getCliente().getListaProduto()) {
+//					
+//					Optional<Produto> produtoOptional = this.getListaProduto().stream()
+//							.filter(x -> x.getIdProduto() == elementClienteProduto.getIdProduto())
+//							.findFirst();
+//					
+//					if (produtoOptional.isPresent()) {
+//						Produto produtoAtual = produtoOptional.get();
+//						
+//						if(elementClienteProduto.getQtdSolicitada() == null
+//								|| elementClienteProduto.getQtdSolicitada().intValue() <= 0)
+//						{
+//							throw new Exception("O campo Quantidade do produto " + produtoAtual.getDesProduto() + " é obrigatório!");			
+//						}
+//						
+//						if(produtoAtual.getQtdLoteMinimo().intValue() > elementClienteProduto.getQtdSolicitada().intValue())
+//						{
+//							throw new Exception("O Lote Mínimo do produto " + produtoAtual.getDesProduto() + " não foi atingida! Quantidade de Lote Mínimo: " + produtoAtual.getQtdLoteMinimo());
+//						}
+//						
+//						if(elementClienteProduto.getQtdSolicitada().intValue() % produtoAtual.getQtdMultiplo().intValue() != 0)
+//						{
+//							throw new Exception("A Quantidade do produto " + produtoAtual.getDesProduto() + " deve ser solicitada em múltiplo de "+ produtoAtual.getQtdMultiplo() +"!");
+//						}
+//					}
+//				}
+//			}
 		}
 	}
 	
@@ -657,19 +657,19 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
                     .filter(x -> x.getIdProduto() == produto.getIdProduto())
                     .findFirst();
 
-			if (produtoOptional.isPresent()) {
-				Produto produtoAtual = produtoOptional.get();
-					
-				if(produtoAtual.getQtdLoteMinimo().intValue() > produto.getQtdSolicitada().intValue())
-				{
-					throw new Exception("O Lote Mínimo do produto " + produtoAtual.getDesProduto() + " não foi atingida! Quantidade de Lote Mínimo: " + produtoAtual.getQtdLoteMinimo());
-				}
-				
-				if(produto.getQtdSolicitada().intValue() % produtoAtual.getQtdMultiplo().intValue() != 0)
-				{
-					throw new Exception("A Quantidade do produto " + produtoAtual.getDesProduto() + " deve ser solicitada em múltiplo de "+ produtoAtual.getQtdMultiplo() +"!");
-				}
-			}
+//			if (produtoOptional.isPresent()) {
+//				Produto produtoAtual = produtoOptional.get();
+//					
+//				if(produtoAtual.getQtdLoteMinimo().intValue() > produto.getQtdSolicitada().intValue())
+//				{
+//					throw new Exception("O Lote Mínimo do produto " + produtoAtual.getDesProduto() + " não foi atingida! Quantidade de Lote Mínimo: " + produtoAtual.getQtdLoteMinimo());
+//				}
+//				
+//				if(produto.getQtdSolicitada().intValue() % produtoAtual.getQtdMultiplo().intValue() != 0)
+//				{
+//					throw new Exception("A Quantidade do produto " + produtoAtual.getDesProduto() + " deve ser solicitada em múltiplo de "+ produtoAtual.getQtdMultiplo() +"!");
+//				}
+//			}
 		}
 		catch (Exception e) 
 		{
