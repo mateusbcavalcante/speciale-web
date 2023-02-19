@@ -41,6 +41,8 @@
 		<mapping class="br.com.a2dm.brcmn.entity.Parametro"/>
 		<mapping class="br.com.a2dm.brcmn.entity.RecuperarSenha"/>
 		<mapping class="br.com.a2dm.brcmn.entity.UsuarioDevice"/>
+		<mapping class="br.com.a2dm.brcmn.entity.ativmob.Event"/>
+		<mapping class="br.com.a2dm.brcmn.entity.ativmob.Form"/>
 		
 		<mapping class="br.com.a2dm.spdm.entity.Cliente"/>
 		<mapping class="br.com.a2dm.spdm.entity.ClienteProduto"/>
