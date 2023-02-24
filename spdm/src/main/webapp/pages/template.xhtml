@@ -168,7 +168,14 @@
 		                				<i class="fa fa-calendar"></i> 
 		                				Feriado
 	                				</h:commandLink>
-                				</li>                
+                				</li> 
+                				
+                				<li class="#{sessionScope.flgMenuManCli}">
+		                			<h:commandLink action="#{sugestaoPedidoBean.preparaPesquisar}">
+		                				<i class="fa fa-calendar"></i> 
+		                				Sugestão de Pedido
+	                				</h:commandLink>
+                				</li>               
 			                </h:panelGroup>
 			              </ul>
 			            </li>

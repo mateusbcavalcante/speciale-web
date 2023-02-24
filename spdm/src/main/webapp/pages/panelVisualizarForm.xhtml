@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+					  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+				xmlns:ui="http://java.sun.com/jsf/facelets"
+				xmlns:h="http://java.sun.com/jsf/html"
+				xmlns:a4j="http://richfaces.org/a4j"
+				xmlns:rich="http://richfaces.org/rich"
+				xmlns:f="http://java.sun.com/jsf/core"
+				xmlns:t="http://myfaces.apache.org/tomahawk"
+				xmlns:mj="http://mojarra.dev.java.net/mojarra_ext">
+	
+		<f:facet name="header">
+			<h:panelGroup>
+				<h:outputText value="Sugestão de Pedido - Visualizar" />
+			</h:panelGroup>
+		</f:facet>
+		
+		<f:facet name="controls">
+			<h:outputLink value="#" onclick="#{rich:component('panVisualizar')}.hide(); return false;">
+		    	<h:graphicImage value="../images/closeModal.png" id="fechaPanelVisualizar" style="width: 16px; height: 16px; vertical-align:middle;"/>
+	       	</h:outputLink>
+		</f:facet>
+
+		<div class="modal-body">
+			
+			<rich:tabPanel switchType="client">
+				<rich:tab header="Produtos">
+					<div class="box-body">
+					   <label for="imagem" class="col-sm-3 control-label">Imagem:</label>
+		               <div class="col-sm-6" style="padding-top: 7px;">
+		                 <h:outputLink value="#{crudBean.entity.imagem}" target="_blank" rendered="#{crudBean.entity.imagem != null}">
+					    	<h:graphicImage value="../images/link.png" title="Imagem" style="border:none; width: 18px; height: 18px;"/>
+				       	 </h:outputLink>
+		               </div>
+	               </div>
+	               
+	               <div class="box-body">
+		             <rich:dataTable id="tblData" 
+								 value="#{crudBean.entity.forms}" 
+							       var="rst" rows="10"
+							styleClass="table table-bordered table-striped dataTable"
+					    onrowmouseover="this.style.cursor='default';this.style.backgroundColor='#FFF8DC';" 
+					  	 onrowmouseout="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"
+							  rendered="#{not empty crudBean.searchResult and crudBean.searching}">	
+							  					     
+						<f:facet name="header">
+							<rich:columnGroup>
+								<rich:column style="width: 80%; text-align: center;">
+									Produto
+								</rich:column>
+								<rich:column style="width: 20%; text-align: center;">
+									Quantidade
+								</rich:column>
+							</rich:columnGroup>
+						</f:facet>
+						<rich:column style="text-align: left;">
+							<h:outputText value="#{rst.label}" />
+						</rich:column>
+						
+						<rich:column style="text-align: right;">
+							<h:outputText value="#{rst.value}" />
+						</rich:column>
+					</rich:dataTable>
+					</div>
+				</rich:tab>
+			</rich:tabPanel>		
+		</div>
+	
+		<div class="modal-footer">			
+			<input type="button" onclick="#{rich:component('panVisualizar')}.hide();" class="btn btn-default" value="Fechar (X)" accesskey="X"/>
+		</div>
+		
+</ui:composition>
