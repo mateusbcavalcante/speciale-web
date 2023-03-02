@@ -27,7 +27,7 @@
 			<rich:tabPanel switchType="client">
 				<rich:tab header="Produtos">
 					<div class="box-body">
-					   <label for="imagem" class="col-sm-3 control-label">Imagem:</label>
+					   <label for="imagem" class="col-sm-6 control-label">Imagem:</label>
 		               <div class="col-sm-6" style="padding-top: 7px;">
 		                 <h:outputLink value="#{crudBean.entity.imagem}" target="_blank" rendered="#{crudBean.entity.imagem != null}">
 					    	<h:graphicImage value="../images/link.png" title="Imagem" style="border:none; width: 18px; height: 18px;"/>
@@ -46,10 +46,10 @@
 							  					     
 						<f:facet name="header">
 							<rich:columnGroup>
-								<rich:column style="width: 80%; text-align: center;">
+								<rich:column style="width: 50%; text-align: center;">
 									Produto
 								</rich:column>
-								<rich:column style="width: 20%; text-align: center;">
+								<rich:column style="width: 50%; text-align: center;">
 									Quantidade
 								</rich:column>
 							</rich:columnGroup>
@@ -58,7 +58,7 @@
 							<h:outputText value="#{rst.label}" />
 						</rich:column>
 						
-						<rich:column style="text-align: right;">
+						<rich:column style="text-align: center;">
 							<h:outputText value="#{rst.value}" />
 						</rich:column>
 					</rich:dataTable>

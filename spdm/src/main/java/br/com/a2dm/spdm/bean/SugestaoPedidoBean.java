@@ -8,11 +8,15 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.RequestScoped;
 import javax.faces.context.FacesContext;
+import javax.faces.event.ActionEvent;
 
 import br.com.a2dm.brcmn.entity.ativmob.Event;
 import br.com.a2dm.brcmn.entity.ativmob.Form;
 import br.com.a2dm.brcmn.util.jsf.AbstractBean;
+import br.com.a2dm.brcmn.util.jsf.Variaveis;
 import br.com.a2dm.spdm.config.MenuControl;
+import br.com.a2dm.spdm.entity.Cliente;
+import br.com.a2dm.spdm.service.ClienteService;
 import br.com.a2dm.spdm.service.EventService;
 import br.com.a2dm.spdm.service.FormService;
 
@@ -54,9 +58,49 @@ public class SugestaoPedidoBean extends AbstractBean<Event, EventService>
 	        FacesContext.getCurrentInstance().addMessage(null, message);
 		}
 	}
+	
+	public void aprovar() 
+	{		
+		try
+		{
+			if(this.getEntity() != null)
+			{
+				EventService.getInstancia().aprovar(this.getEntity());
+				FacesMessage message = new FacesMessage("Sugestão aprovada!");
+				message.setSeverity(FacesMessage.SEVERITY_INFO);
+				FacesContext.getCurrentInstance().addMessage(null, message);
+			}
+		}
+		catch (Exception e) 
+		{
+			FacesMessage message = new FacesMessage(e.getMessage());
+	        message.setSeverity(FacesMessage.SEVERITY_ERROR);
+	        FacesContext.getCurrentInstance().addMessage(null, message);
+		}		
+	}
+	
+	public void reprovar() 
+	{		
+		try
+		{
+			if(this.getEntity() != null)
+			{
+				EventService.getInstancia().reprovar(this.getEntity());
+				FacesMessage message = new FacesMessage("Sugestão reprovada!");
+				message.setSeverity(FacesMessage.SEVERITY_INFO);
+				FacesContext.getCurrentInstance().addMessage(null, message);
+			}
+		}
+		catch (Exception e) 
+		{
+			FacesMessage message = new FacesMessage(e.getMessage());
+	        message.setSeverity(FacesMessage.SEVERITY_ERROR);
+	        FacesContext.getCurrentInstance().addMessage(null, message);
+		}		
+	}
 
 	private List<Form> getForms(List<Form> forms) {
-		return forms.stream().filter(x -> x.getValue() != null && x.getValue().intValue() > 0)
+		return forms.stream().filter(x -> x.getValue() != null)
 				             .collect(Collectors.toList());
 	}
 
