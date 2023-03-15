@@ -175,7 +175,15 @@
 		                				<i class="fa fa-calendar"></i> 
 		                				Sugestão de Pedido
 	                				</h:commandLink>
-                				</li>               
+                				</li>
+                				
+                				<li class="#{sessionScope.flgMenuManCli}">
+		                			<h:commandLink action="#{avisoBean.preparaPesquisar}">
+		                				<i class="fa fa-bell"></i> 
+		                				Avisos
+	                				</h:commandLink>
+                				</li>
+                				                  
 			                </h:panelGroup>
 			              </ul>
 			            </li>
