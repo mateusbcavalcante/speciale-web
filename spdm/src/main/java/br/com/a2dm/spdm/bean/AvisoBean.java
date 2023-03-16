@@ -1,5 +1,10 @@
 package br.com.a2dm.spdm.bean;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.RequestScoped;
@@ -9,11 +14,16 @@ import br.com.a2dm.brcmn.util.jsf.AbstractBean;
 import br.com.a2dm.brcmn.util.jsf.Variaveis;
 import br.com.a2dm.spdm.config.MenuControl;
 import br.com.a2dm.spdm.entity.Aviso;
+import br.com.a2dm.spdm.entity.Cliente;
 import br.com.a2dm.spdm.service.AvisoService;
+import br.com.a2dm.spdm.service.ClienteService;
 
 @RequestScoped
 @ManagedBean
 public class AvisoBean extends AbstractBean<Aviso, AvisoService>{
+	
+	private LocalDate dataAtual;
+	private List<Aviso> avisos;
 	
 	public AvisoBean()
 	{
@@ -25,6 +35,38 @@ public class AvisoBean extends AbstractBean<Aviso, AvisoService>{
 		MenuControl.ativarSubMenu("flgMenuManCli");
 	}
 	
+	@Override
+	protected void setValoresDefault() throws Exception
+	{
+			
+		Aviso aviso = new Aviso();	
+		List<Aviso> resultCli = AvisoService.getInstancia().pesquisar(aviso, 0);
+		
+		System.out.println("result" + resultCli);
+		
+		this.setAvisos(resultCli);
+		
+		System.out.println("avisos" + avisos);
+		
+		this.setDataAtual(LocalDate.now());
+	}
+	
+	public LocalDate getDataAtual() {
+		return dataAtual;
+	}
+
+	public void setDataAtual(LocalDate dataAtual) {
+		this.dataAtual = dataAtual;
+	}
+
+	public List<Aviso> getAvisos() {
+		return avisos;
+	}
+
+	public void setAvisos(List<Aviso> avisos) {
+		this.avisos = avisos;
+	}
+
 	@Override
 	protected void completarInserir() throws Exception
 	{
