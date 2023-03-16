@@ -8,30 +8,36 @@
 	xmlns:a4j="http://richfaces.org/a4j"
 	xmlns:rich="http://richfaces.org/rich"
 	xmlns:mj="http://mojarra.dev.java.net/mojarra_ext"
-	xmlns:t="http://myfaces.apache.org/tomahawk" template="template.xhtml">
+	xmlns:t="http://myfaces.apache.org/tomahawk" 
+	template="crud_template.xhtml">
 
-	<ui:param name="crudBean" value="#{avisoBean}" />
+	<ui:param name="pageTitle" value="Avisos" />
+	<ui:param name="crudBean" value="#{principalBean}" />
+	
+	<ui:define name="saveStateObjectsDefined">
+		<t:saveState value="#{crudBean.listAvisos}" />
+	</ui:define>
 	
 	<ui:define name="content">
-		<h:panelGroup id="panelGroupDePesquisa"
-			style="height:100%;width:100%;">
+		<h:panelGroup id="panelGroupDePesquisa" style="height:100%;width:100%;" rendered="#{crudBean.searching}">
 			<f:subview id="viewBusca">
 				<div class="box-body">
 					<i class="fa fa-info-circle" aria-hidden="true"></i> AVISO <br />
 					<br />
 
-					<ui:repeat value="#{crudBean.searchResult}" var="rst">
-					    <h:panelGroup rendered="#{rst.ativo}">
+					<ui:repeat value="#{crudBean.listAvisos}" var="rst">
+					    <h:panelGroup>
 					    	<hr />
 					        <h:outputText value="#{rst.des_aviso}" style="color:red; font-weight:bold;" />
 					    </h:panelGroup>
 					</ui:repeat>
-
 				</div>
 			</f:subview>
 		</h:panelGroup>
 	</ui:define>
 	
-	<ui:debug hotkey="x" />
+	<ui:define name="buttonItens">
+	
+	</ui:define>
 
 </ui:composition>
