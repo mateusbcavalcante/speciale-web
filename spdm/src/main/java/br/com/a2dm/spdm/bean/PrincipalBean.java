@@ -1,5 +1,8 @@
 package br.com.a2dm.spdm.bean;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.faces.bean.ManagedBean;
@@ -35,7 +38,23 @@ public class PrincipalBean extends AbstractBean<Aviso, AvisoService> {
 			
 			List<Aviso> listAvisosAtivos = AvisoService.getInstancia().pesquisar(aviso, 0);
 			
-			setListAvisos(listAvisosAtivos);
+			List<Aviso> listAvisosAtivosNaData = new ArrayList<Aviso>();
+			
+			Calendar cal = Calendar.getInstance();
+		    cal.setTime(new Date());
+		    cal.set(Calendar.HOUR_OF_DAY, 0);
+		    cal.set(Calendar.MINUTE, 0);
+		    cal.set(Calendar.SECOND, 0);
+		    cal.set(Calendar.MILLISECOND, 0);
+			Date dataAtual = cal.getTime();
+			
+			for (Aviso avisoAtivo : listAvisosAtivos) {
+				if (dataAtual.compareTo(avisoAtivo.getDat_inicial()) >= 0 && dataAtual.compareTo(avisoAtivo.getDat_final()) <= 0) {
+					listAvisosAtivosNaData.add(avisoAtivo);
+				}
+			}
+			
+			setListAvisos(listAvisosAtivosNaData);
 		} catch (Exception e) {
 			System.out.println("Erro na consulta de avisos");
 		}

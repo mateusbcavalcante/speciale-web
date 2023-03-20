@@ -18,9 +18,9 @@
 			<f:subview id="viewBusca">
 				<div class="box-body">
                     <div class="form-group">
-                      <label for="inputEmail3" class="col-sm-2 control-label">Data do Aviso *</label>
+                      <label for="inputEmail3" class="col-sm-2 control-label">Data Inicial *</label>
                       <div class="col-sm-2" style="width: 13% !important;">
-	                	  <rich:calendar value="#{crudBean.searchObject.dat_aviso}" buttonClass="glyphicon glyphicon-calendar" inputSize="9" buttonIcon="../images/calendar.png"  datePattern="dd/MM/yyyy" inputClass="form-control" showWeeksBar="false" enableManualInput="true" oninputkeypress="return formataData(aviso,this);" maxlength="10"/>
+	                	  <rich:calendar value="#{crudBean.searchObject.dat_inicial}" buttonClass="glyphicon glyphicon-calendar" inputSize="9" buttonIcon="../images/calendar.png"  datePattern="dd/MM/yyyy" inputClass="form-control" showWeeksBar="false" enableManualInput="true" oninputkeypress="return formataData(aviso,this);" maxlength="10"/>
 	                  </div>
                     </div>
             	</div>
@@ -46,9 +46,15 @@
 		                 
 		                 <div class="box-body" style="padding: 1px;">	
 		                 	<div class="form-group">
-		                   	   <label for="inputEmail3" class="col-sm-2 control-label">Data do Aviso *</label>
+		                   	   <label for="inputEmail3" class="col-sm-2 control-label">Data Inicial *</label>
 			                   <div class="col-sm-2" style="width: 13% !important;">
-			                	  <rich:calendar value="#{crudBean.entity.dat_aviso}" buttonClass="glyphicon glyphicon-calendar" inputSize="9" buttonIcon="../images/calendar.png"  datePattern="dd/MM/yyyy" inputClass="form-control" showWeeksBar="false" enableManualInput="true" oninputkeypress="return formataData(event,this);" maxlength="10"/>
+			                	  <rich:calendar value="#{crudBean.entity.dat_inicial}" buttonClass="glyphicon glyphicon-calendar" inputSize="9" buttonIcon="../images/calendar.png"  datePattern="dd/MM/yyyy" inputClass="form-control" showWeeksBar="false" enableManualInput="true" oninputkeypress="return formataData(event,this);" maxlength="10"/>
+			                   </div>
+		                 	</div>
+		                 	<div class="form-group">
+		                   	   <label for="inputEmail3" class="col-sm-2 control-label">Data Final *</label>
+			                   <div class="col-sm-2" style="width: 13% !important;">
+			                	  <rich:calendar value="#{crudBean.entity.dat_final}" buttonClass="glyphicon glyphicon-calendar" inputSize="9" buttonIcon="../images/calendar.png"  datePattern="dd/MM/yyyy" inputClass="form-control" showWeeksBar="false" enableManualInput="true" oninputkeypress="return formataData(event,this);" maxlength="10"/>
 			                   </div>
 		                 	</div>
 		                </div>
@@ -74,7 +80,10 @@
 						<f:facet name="header">
 							<rich:columnGroup>
 								<rich:column style="width: 10%; text-align: center;">
-									Data
+									Data Inicial
+								</rich:column>
+								<rich:column style="width: 10%; text-align: center;">
+									Data Final
 								</rich:column>
 								<rich:column style="width: 60%; text-align: center;">
 									Descrição
@@ -88,7 +97,11 @@
 						</f:facet>
 						
 						<rich:column style="text-align: center;">
-							<h:outputText value="#{rst.dat_aviso}" />
+							<h:outputText value="#{rst.dat_inicial}" />
+						</rich:column>
+						
+						<rich:column style="text-align: center;">
+							<h:outputText value="#{rst.dat_final}" />
 						</rich:column>
 						
 						<rich:column style="text-align: left;">
