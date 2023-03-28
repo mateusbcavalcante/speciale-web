@@ -26,18 +26,21 @@
 			
 			<rich:tabPanel switchType="client">
 				<rich:tab header="Produtos">
-					<div class="box-body">
-					   <label for="imagem" class="col-sm-6 control-label">Imagem:</label>
-		               <div class="col-sm-6" style="padding-top: 7px;">
-		                 <h:outputLink value="#{crudBean.entity.imagem}" target="_blank" rendered="#{crudBean.entity.imagem != null}">
-					    	<h:graphicImage value="../images/link.png" title="Imagem" style="border:none; width: 18px; height: 18px;"/>
-				       	 </h:outputLink>
+				
+					<rich:panel rendered="#{crudBean.entity.imagem != null}">
+						<div class="box-body">
+						   <label for="imagem" class="col-sm-6 control-label">Imagem:</label>
+			               <div class="col-sm-6" style="padding-top: 7px;">
+			                 <h:outputLink value="#{crudBean.entity.imagem}" target="_blank">
+						    	<h:graphicImage value="../images/link.png" title="Imagem" style="border:none; width: 18px; height: 18px;"/>
+					       	 </h:outputLink>
+			               </div>
 		               </div>
-	               </div>
+	               </rich:panel>
 	               
 	               <div class="box-body">
 		             <rich:dataTable id="tblData" 
-								 value="#{crudBean.entity.forms}" 
+								 value="#{crudBean.entity.itens}" 
 							       var="rst" rows="10"
 							styleClass="table table-bordered table-striped dataTable"
 					    onrowmouseover="this.style.cursor='default';this.style.backgroundColor='#FFF8DC';" 
@@ -54,13 +57,17 @@
 								</rich:column>
 							</rich:columnGroup>
 						</f:facet>
+						
 						<rich:column style="text-align: left;">
 							<h:outputText value="#{rst.label}" />
 						</rich:column>
 						
 						<rich:column style="text-align: center;">
-							<h:outputText value="#{rst.value}" />
+							<h:inputText value="#{rst.value}" styleClass="form-control" maxlength="200" id="quantidade">
+				            	<f:passThroughAttribute name="placeholder" value="Quantidade"/>
+	                        </h:inputText>
 						</rich:column>
+						
 					</rich:dataTable>
 					</div>
 				</rich:tab>
@@ -72,3 +79,4 @@
 		</div>
 		
 </ui:composition>
+

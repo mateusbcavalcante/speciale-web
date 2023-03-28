@@ -43,8 +43,8 @@
 		<mapping class="br.com.a2dm.brcmn.entity.UsuarioDevice"/>
 		
 
-		<mapping class="br.com.a2dm.spdm.entity.Event"/>
-		<mapping class="br.com.a2dm.spdm.entity.Form"/>
+		<mapping class="br.com.a2dm.spdm.entity.SugestaoPedido"/>
+		<mapping class="br.com.a2dm.spdm.entity.Item"/>
 		<mapping class="br.com.a2dm.spdm.entity.Aviso"/>
 		<mapping class="br.com.a2dm.spdm.entity.Cliente"/>
 		<mapping class="br.com.a2dm.spdm.entity.ClienteProduto"/>

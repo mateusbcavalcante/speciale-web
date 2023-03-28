@@ -13,22 +13,23 @@ import javax.faces.context.FacesContext;
 import br.com.a2dm.brcmn.util.jsf.AbstractBean;
 import br.com.a2dm.spdm.config.MenuControl;
 import br.com.a2dm.spdm.entity.Cliente;
-import br.com.a2dm.spdm.entity.Event;
-import br.com.a2dm.spdm.entity.Form;
+import br.com.a2dm.spdm.entity.Item;
+import br.com.a2dm.spdm.entity.OpcaoEntrega;
+import br.com.a2dm.spdm.entity.SugestaoPedido;
 import br.com.a2dm.spdm.service.ClienteService;
-import br.com.a2dm.spdm.service.EventService;
-import br.com.a2dm.spdm.service.FormService;
+import br.com.a2dm.spdm.service.ItemService;
+import br.com.a2dm.spdm.service.SugestaoPedidoService;
 
 @RequestScoped
 @ManagedBean
-public class SugestaoPedidoBean extends AbstractBean<Event, EventService>
+public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPedidoService>
 {
 	
 	private List<Cliente> listaCliente;
 	
 	public SugestaoPedidoBean()
 	{
-		super(EventService.getInstancia());
+		super(SugestaoPedidoService.getInstancia());
 		this.ACTION_SEARCH = "sugestaoPedido";
 		this.pageTitle = "Sugestão de Pedido";
 		
@@ -40,17 +41,17 @@ public class SugestaoPedidoBean extends AbstractBean<Event, EventService>
 	{
 		try
 		{
-			Form form = new Form();
-			form.setIdEvent(this.getEntity().getId_event());
+			Item Item = new Item();
+			Item.setIdSugestaoPedido(this.getEntity().getIdSugestaoPedido());
 			
-			List<Form> forms = FormService.getInstancia().pesquisar(form, 0);
+			List<Item> Items = ItemService.getInstancia().pesquisar(Item, 0);
 			
-			if (forms != null && forms.size() > 0) {
-				Optional<Form> formImagemOptional = this.getObjectImage(forms);
-				forms = this.getForms(forms);				
-				setEntity(new Event(formImagemOptional.isPresent() ? formImagemOptional.get().getUrl() : null, forms));
+			if (Items != null && Items.size() > 0) {
+				Optional<Item> ItemImagemOptional = this.getObjectImage(Items);
+				Items = this.getItems(Items);				
+				setEntity(new SugestaoPedido(ItemImagemOptional.isPresent() ? ItemImagemOptional.get().getUrl() : null, Items));
 			} else {
-				setEntity(new Event());
+				setEntity(new SugestaoPedido());
 			}
 		}
 		catch (Exception e) 
@@ -63,7 +64,7 @@ public class SugestaoPedidoBean extends AbstractBean<Event, EventService>
 	
 	@Override
 	protected int getJoinPesquisar() {
-		return EventService.JOIN_CLIENTE;
+		return SugestaoPedidoService.JOIN_PEDIDO_OPCAO_ENTREGA;
 	}
 	
 	public void aprovar() 
@@ -72,8 +73,10 @@ public class SugestaoPedidoBean extends AbstractBean<Event, EventService>
 		{
 			if(this.getEntity() != null)
 			{
-				this.validarAprovar();
-				EventService.getInstancia().aprovar(this.getEntity());
+				// this.validarAprovar();
+				this.getEntity().setItens(null);
+				SugestaoPedidoService.getInstancia().aprovar(this.getEntity());
+				this.getEntity().setOpcaoEntrega(this.getEntity().getOpcaoEntrega());
 				FacesMessage message = new FacesMessage("A Sugestão de Pedido foi aprovada com sucesso!");
 				message.setSeverity(FacesMessage.SEVERITY_INFO);
 				FacesContext.getCurrentInstance().addMessage(null, message);
@@ -87,12 +90,14 @@ public class SugestaoPedidoBean extends AbstractBean<Event, EventService>
 		}		
 	}
 
+	/*
 	private void validarAprovar() throws Exception {
-		this.getEntity().setForms(null);
+		this.getEntity().setItens(null);
 		if(this.getEntity().getIdCliente() == null) {
 			throw new Exception("O campo Cliente é obrigatório!");			
 		}
 	}
+	*/
 	
 	public void reprovar() 
 	{		
@@ -100,7 +105,7 @@ public class SugestaoPedidoBean extends AbstractBean<Event, EventService>
 		{
 			if(this.getEntity() != null)
 			{
-				EventService.getInstancia().reprovar(this.getEntity());
+				SugestaoPedidoService.getInstancia().reprovar(this.getEntity());
 				FacesMessage message = new FacesMessage("A Sugestão de Pedido foi reprovada com sucesso!");
 				message.setSeverity(FacesMessage.SEVERITY_INFO);
 				FacesContext.getCurrentInstance().addMessage(null, message);
@@ -131,13 +136,13 @@ public class SugestaoPedidoBean extends AbstractBean<Event, EventService>
 		this.setListaCliente(listaCliente);
 	}
 
-	private List<Form> getForms(List<Form> forms) {
-		return forms.stream().filter(x -> x.getValue() != null)
+	private List<Item> getItems(List<Item> Items) {
+		return Items.stream().filter(x -> x.getValue() != null)
 				             .collect(Collectors.toList());
 	}
 
-	private Optional<Form> getObjectImage(List<Form> forms) {
-		return forms.stream().filter(x -> x.getLabel().equalsIgnoreCase(FormService.OBJECT_CAPTURE_IMAGE))
+	private Optional<Item> getObjectImage(List<Item> Items) {
+		return Items.stream().filter(x -> x.getLabel().equalsIgnoreCase(ItemService.OBJECT_CAPTURE_IMAGE))
 							 .findFirst();
 	}
 
