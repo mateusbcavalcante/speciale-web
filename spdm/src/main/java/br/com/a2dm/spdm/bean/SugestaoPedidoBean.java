@@ -14,7 +14,6 @@ import br.com.a2dm.brcmn.util.jsf.AbstractBean;
 import br.com.a2dm.spdm.config.MenuControl;
 import br.com.a2dm.spdm.entity.Cliente;
 import br.com.a2dm.spdm.entity.Item;
-import br.com.a2dm.spdm.entity.OpcaoEntrega;
 import br.com.a2dm.spdm.entity.SugestaoPedido;
 import br.com.a2dm.spdm.service.ClienteService;
 import br.com.a2dm.spdm.service.ItemService;
@@ -53,6 +52,20 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 			} else {
 				setEntity(new SugestaoPedido());
 			}
+		}
+		catch (Exception e) 
+		{
+			FacesMessage message = new FacesMessage(e.getMessage());
+	        message.setSeverity(FacesMessage.SEVERITY_ERROR);
+	        FacesContext.getCurrentInstance().addMessage(null, message);
+		}
+	}
+	
+	public void atualizarQuantidade(Item item) 
+	{
+		try 
+		{
+			ItemService.getInstancia().atualizarQuantidade(item);
 		}
 		catch (Exception e) 
 		{

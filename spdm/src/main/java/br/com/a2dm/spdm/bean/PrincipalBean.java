@@ -23,7 +23,7 @@ public class PrincipalBean extends AbstractBean<Aviso, AvisoService> {
 	{
 		super(AvisoService.getInstancia());
 		this.ACTION_SEARCH = "principal";
-		this.pageTitle = "Aviso";
+		this.pageTitle = "Tela Início";
 		
 		MenuControl.ativarMenu("flgMenuMan");
 		MenuControl.ativarSubMenu("flgMenuManCli");
@@ -32,12 +32,11 @@ public class PrincipalBean extends AbstractBean<Aviso, AvisoService> {
 	}
 	
 	private void listarAvisos() throws Exception {
-		try {			
+		try {
 			Aviso aviso = new Aviso();
 			aviso.setAtivo(true);
 			
 			List<Aviso> listAvisosAtivos = AvisoService.getInstancia().pesquisar(aviso, 0);
-			
 			List<Aviso> listAvisosAtivosNaData = new ArrayList<Aviso>();
 			
 			Calendar cal = Calendar.getInstance();

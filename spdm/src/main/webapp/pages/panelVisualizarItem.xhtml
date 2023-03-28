@@ -63,9 +63,9 @@
 						</rich:column>
 						
 						<rich:column style="text-align: center;">
-							<h:inputText value="#{rst.value}" styleClass="form-control" maxlength="200" id="quantidade">
-				            	<f:passThroughAttribute name="placeholder" value="Quantidade"/>
-	                        </h:inputText>
+	                        <h:inputText value="#{rst.value}" styleClass="form-control" maxlength="5" onkeypress="return soNumero(event, this);">
+								<a4j:ajax event="blur" listener="#{crudBean.atualizarQuantidade(rst)}" execute="@form"/>
+		                    </h:inputText>
 						</rich:column>
 						
 					</rich:dataTable>
