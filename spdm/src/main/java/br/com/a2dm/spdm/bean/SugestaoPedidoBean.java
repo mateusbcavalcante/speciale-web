@@ -29,12 +29,13 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 {
 	
 	private List<Produto> listaProduto;
-	private BigInteger idProdutoAdicionar;
-	private BigInteger qtdSolicitada;
+	private Produto produtoAdicionar = new Produto();
+	private BigInteger valueProdutoAdicionar;
 	
 	public SugestaoPedidoBean()
 	{
 		super(SugestaoPedidoService.getInstancia());
+
 		this.ACTION_SEARCH = "sugestaoPedido";
 		this.pageTitle = "Sugestão de Pedido";
 		
@@ -115,10 +116,14 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 		try {
 			Item item = new Item();
 			item.setIdSugestaoPedido(this.getEntity().getIdSugestaoPedido());
-			Item itemInserido = ItemService.getInstancia().inserir(item);
+			item.setIntegId(this.getProdutoAdicionar().getIdProduto().intValue());
+			item.setLabel(this.getProdutoAdicionar().getDesProduto());
+			item.setValue(this.getValueProdutoAdicionar().intValue());
+			ItemService.getInstancia().inserir(item);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			FacesMessage message = new FacesMessage(e.getMessage());
+	        message.setSeverity(FacesMessage.SEVERITY_ERROR);
+	        FacesContext.getCurrentInstance().addMessage(null, message);
 		}
 	}
 	
@@ -153,6 +158,19 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 			FacesMessage message = new FacesMessage(e.getMessage());
 	        message.setSeverity(FacesMessage.SEVERITY_ERROR);
 	        FacesContext.getCurrentInstance().addMessage(null, message);
+		}
+	}
+	
+	public void buscarInformacoesProduto() throws Exception {
+		if (this.getProdutoAdicionar().getIdProduto() != null && this.getProdutoAdicionar().getIdProduto().longValue() > 0) {
+			Optional<Produto> produtoOptional = this.getListaProduto().stream()
+					                                   .filter(x -> x.getIdProduto() == this.getProdutoAdicionar().getIdProduto())
+					                                   .findFirst();
+			
+			if (produtoOptional.isPresent()) {
+				this.setProdutoAdicionar(produtoOptional.get());
+			}
+					                                
 		}
 	}
 	
@@ -221,20 +239,20 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 		this.listaProduto = listaProduto;
 	}
 
-	public BigInteger getIdProdutoAdicionar() {
-		return idProdutoAdicionar;
+	public Produto getProdutoAdicionar() {
+		return produtoAdicionar;
 	}
 
-	public void setIdProdutoAdicionar(BigInteger idProdutoAdicionar) {
-		this.idProdutoAdicionar = idProdutoAdicionar;
+	public void setProdutoAdicionar(Produto produtoAdicionar) {
+		this.produtoAdicionar = produtoAdicionar;
+	}
+	
+	public BigInteger getValueProdutoAdicionar() {
+		return valueProdutoAdicionar;
 	}
 
-	public BigInteger getQtdSolicitada() {
-		return qtdSolicitada;
-	}
-
-	public void setQtdSolicitada(BigInteger qtdSolicitada) {
-		this.qtdSolicitada = qtdSolicitada;
+	public void setValueProdutoAdicionar(BigInteger valueProdutoAdicionar) {
+		this.valueProdutoAdicionar = valueProdutoAdicionar;
 	}
 	
 }

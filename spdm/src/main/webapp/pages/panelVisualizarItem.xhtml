@@ -12,6 +12,7 @@
 				
 		<ui:define name="saveStateObjectsDefined">
 			<t:saveState value="#{crudBean.listaProduto}" />
+			<t:saveState value="#{crudBean.produtoAdicionar}" />
 		</ui:define>
 	
 		<f:facet name="header">
@@ -42,22 +43,32 @@
 		            	</div>
 					</rich:panel>
 	               
-	                <rich:panel id="panelPesquisaProduto">
-            	   		<div class="form-group">
-	                   		<label for="inputEmail3" class="col-sm-2 control-label">Produto *</label>
-		               		<div class="col-sm-4">			                	
-								<h:selectOneMenu value="#{crudBean.idProdutoAdicionar}" converter="simpleIndexConverter" styleClass="form-control" style="width:700px; display: initial;">								
-									<t:selectItems var="o" itemValue="#{o.idProduto}" itemLabel="#{o.desProduto}" value="#{crudBean.listaProduto}" />
-								</h:selectOneMenu>
-							</div>
-							<label for="inputEmail3" class="col-sm-2 control-label">Quantidade / Und *</label>
-							<div class="col-sm-4">
-	 		                    <h:inputText value="#{crudBean.qtdSolicitada}" style="width: 150px; display: initial;" styleClass="form-control" maxlength="5" onkeypress="return soNumero(event, this);"/>
-	 		                    <a4j:commandButton image="/images/add.png" style="vertical-align: middle; border:white; width: 22px; height: 22px; margin-left:2em; margin-right:2em;" title="ADICIONAR PRODUTO" actionListener="#{crudBean.adicionaProdutoItens}" render="panelListaProduto, panelPesquisaProduto"/>
- 		                    </div>
-						</div>
-	                </rich:panel>
-	                
+	                <rich:panel id="panelPesquisaProduto" rendered="#{crudBean.entity.status == 'Pendente'}">
+					  <div class="row form-group">
+
+					    <div class="col-sm-10">
+					      <label for="inputEmail3" class="control-label">Produto</label>
+					      <div>
+					        <h:selectOneMenu value="#{crudBean.produtoAdicionar.idProduto}" converter="simpleIndexConverter" styleClass="form-control" style="width:100%;">               
+					          <t:selectItems var="o" itemValue="#{o.idProduto}" itemLabel="#{o.desProduto}" value="#{crudBean.listaProduto}" />
+					          <f:ajax listener="#{crudBean.buscarInformacoesProduto}"/>
+					        </h:selectOneMenu>
+					      </div>
+					    </div>
+					    
+					    <div class="col-sm-2">
+					      <label for="inputEmail3" class="control-label">Quantidade</label>
+					      <div class="input-group">
+					        <h:inputText value="#{crudBean.valueProdutoAdicionar}" styleClass="form-control" maxlength="5" onkeypress="return soNumero(event, this);"/>
+					        <span class="input-group-btn">
+					          <a4j:commandButton image="/images/add.png" style="vertical-align: middle; border:white; width: 22px; height: 22px; margin-right: 10px;" title="ADICIONAR PRODUTO" actionListener="#{crudBean.adicionaProdutoItens}" render="panelPesquisaProduto, tblDataItens"/>
+					        </span>
+					      </div>
+					    </div>
+					  </div>
+					</rich:panel>
+					
+					<br/><br/>
 	                
 	               <div class="box-body">
 		             <rich:dataTable id="tblDataItens" 
