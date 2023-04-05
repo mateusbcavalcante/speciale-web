@@ -12,13 +12,7 @@
 				template="crud_template.xhtml">
 			
 	<ui:param name="crudBean" value="#{sugestaoPedidoBean}" />
-	
-	<!--  
-	<ui:define name="saveStateObjectsDefined">
-		<t:saveState value="#{crudBean.listaCliente}" />
-	</ui:define>
-	-->
-	
+
 	<ui:define name="buttonItens" style="height:100%; width:100%;">
 		<h:panelGroup rendered="#{crudBean.searching}">
 			<a4j:commandButton id="pesquisar" styleClass="btn btn-primary" value="Pesquisar (P)" accesskey="P" actionListener="#{crudBean.pesquisar}" render="tblResult"/>
@@ -92,7 +86,6 @@
 						</rich:column>
 						
 						<rich:column style="text-align: center;">
-		                   <div class="col-sm-2">
 								<h:panelGroup rendered="#{empty rst.idOpcaoEntrega}">
 								    <h:selectOneMenu value="#{rst.idOpcaoEntrega}">
 								        <f:selectItem itemValue="#{null}" itemLabel="Escolha a Opção de Entrega" />
@@ -104,7 +97,6 @@
 								<h:panelGroup rendered="#{not empty rst.idOpcaoEntrega}">
 								    <h:outputText value="#{rst.opcaoEntrega.desOpcaoEntrega}" />
 								</h:panelGroup>
-		                   </div>
 	                 	</rich:column>
 						
 						<rich:column style="text-align: center;">

@@ -9,6 +9,10 @@
 				xmlns:f="http://java.sun.com/jsf/core"
 				xmlns:t="http://myfaces.apache.org/tomahawk"
 				xmlns:mj="http://mojarra.dev.java.net/mojarra_ext">
+				
+		<ui:define name="saveStateObjectsDefined">
+			<t:saveState value="#{crudBean.listaProduto}" />
+		</ui:define>
 	
 		<f:facet name="header">
 			<h:panelGroup>
@@ -29,17 +33,34 @@
 				
 					<rich:panel rendered="#{crudBean.entity.imagem != null}">
 						<div class="box-body">
-						   <label for="imagem" class="col-sm-6 control-label">Imagem:</label>
-			               <div class="col-sm-6" style="padding-top: 7px;">
-			                 <h:outputLink value="#{crudBean.entity.imagem}" target="_blank">
-						    	<h:graphicImage value="../images/link.png" title="Imagem" style="border:none; width: 18px; height: 18px;"/>
-					       	 </h:outputLink>
+							<label for="imagem" class="col-sm-6 control-label">Imagem:</label>
+			        		<div class="col-sm-6" style="padding-top: 7px;">
+			                	<h:outputLink value="#{crudBean.entity.imagem}" target="_blank">
+						    		<h:graphicImage value="../images/link.png" title="Imagem" style="border:none; width: 18px; height: 18px;"/>
+					       	 	</h:outputLink>
 			               </div>
-		               </div>
-	               </rich:panel>
+		            	</div>
+					</rich:panel>
 	               
+	                <rich:panel id="panelPesquisaProduto">
+            	   		<div class="form-group">
+	                   		<label for="inputEmail3" class="col-sm-2 control-label">Produto *</label>
+		               		<div class="col-sm-4">			                	
+								<h:selectOneMenu value="#{crudBean.idProdutoAdicionar}" converter="simpleIndexConverter" styleClass="form-control" style="width:700px; display: initial;">								
+									<t:selectItems var="o" itemValue="#{o.idProduto}" itemLabel="#{o.desProduto}" value="#{crudBean.listaProduto}" />
+								</h:selectOneMenu>
+							</div>
+							<label for="inputEmail3" class="col-sm-2 control-label">Quantidade / Und *</label>
+							<div class="col-sm-4">
+	 		                    <h:inputText value="#{crudBean.qtdSolicitada}" style="width: 150px; display: initial;" styleClass="form-control" maxlength="5" onkeypress="return soNumero(event, this);"/>
+	 		                    <a4j:commandButton image="/images/add.png" style="vertical-align: middle; border:white; width: 22px; height: 22px; margin-left:2em; margin-right:2em;" title="ADICIONAR PRODUTO" actionListener="#{crudBean.adicionaProdutoItens}" render="panelListaProduto, panelPesquisaProduto"/>
+ 		                    </div>
+						</div>
+	                </rich:panel>
+	                
+	                
 	               <div class="box-body">
-		             <rich:dataTable id="tblData" 
+		             <rich:dataTable id="tblDataItens" 
 								 value="#{crudBean.entity.itens}" 
 							       var="rst" rows="10"
 							styleClass="table table-bordered table-striped dataTable"
@@ -49,23 +70,34 @@
 							  					     
 						<f:facet name="header">
 							<rich:columnGroup>
-								<rich:column style="width: 50%; text-align: center;">
+							
+								<rich:column style="width: 80%; text-align: center;">
 									Produto
 								</rich:column>
-								<rich:column style="width: 50%; text-align: center;">
+								
+								<rich:column style="width: 10%; text-align: center;">
 									Quantidade
 								</rich:column>
+								
+								<rich:column style="width: 5%; text-align: center;" rendered="#{crudBean.entity.status == 'Pendente'}"/>
+								
 							</rich:columnGroup>
 						</f:facet>
 						
-						<rich:column style="text-align: left;">
+						<rich:column style="text-align: left;" rendered="#{not empty rst.integId}">
 							<h:outputText value="#{rst.label}" />
 						</rich:column>
 						
-						<rich:column style="text-align: center;">
-	                        <h:inputText value="#{rst.value}" styleClass="form-control" maxlength="5" onkeypress="return soNumero(event, this);">
+						<rich:column style="text-align: center;" rendered="#{not empty rst.integId}">
+	                        <h:inputText value="#{rst.value}" disabled="#{crudBean.entity.status != 'Pendente'}" styleClass="form-control" maxlength="5" onkeypress="return soNumero(event, this);">
 								<a4j:ajax event="blur" listener="#{crudBean.atualizarQuantidade(rst)}" execute="@form"/>
 		                    </h:inputText>
+						</rich:column>
+						
+						<rich:column style="text-align: center;" rendered="#{not empty rst.integId and crudBean.entity.status == 'Pendente'}">
+							<a4j:commandButton image="../images/inativar.png" style="border:none; width: 18px; height: 18px;" title="EXCLUIR" action="#{crudBean.removerItem(rst)}" render="formulario" onclick="if (!confirm('Deseja realmente excluir esse item?')) return false">
+								<a4j:ajax render="tblDataItens"/>
+							</a4j:commandButton>
 						</rich:column>
 						
 					</rich:dataTable>

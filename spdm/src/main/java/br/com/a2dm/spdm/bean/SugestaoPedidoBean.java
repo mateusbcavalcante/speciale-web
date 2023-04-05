@@ -1,5 +1,6 @@
 package br.com.a2dm.spdm.bean;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -10,11 +11,14 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.RequestScoped;
 import javax.faces.context.FacesContext;
 
+import br.com.a2dm.brcmn.dto.ProdutoDTO;
 import br.com.a2dm.brcmn.util.jsf.AbstractBean;
 import br.com.a2dm.spdm.config.MenuControl;
 import br.com.a2dm.spdm.entity.Cliente;
 import br.com.a2dm.spdm.entity.Item;
+import br.com.a2dm.spdm.entity.Produto;
 import br.com.a2dm.spdm.entity.SugestaoPedido;
+import br.com.a2dm.spdm.omie.service.OmieProdutoService;
 import br.com.a2dm.spdm.service.ClienteService;
 import br.com.a2dm.spdm.service.ItemService;
 import br.com.a2dm.spdm.service.SugestaoPedidoService;
@@ -24,7 +28,9 @@ import br.com.a2dm.spdm.service.SugestaoPedidoService;
 public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPedidoService>
 {
 	
-	private List<Cliente> listaCliente;
+	private List<Produto> listaProduto;
+	private BigInteger idProdutoAdicionar;
+	private BigInteger qtdSolicitada;
 	
 	public SugestaoPedidoBean()
 	{
@@ -40,19 +46,94 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 	{
 		try
 		{
-			Item Item = new Item();
-			Item.setIdSugestaoPedido(this.getEntity().getIdSugestaoPedido());
+			if (this.getEntity().getStatus().equalsIgnoreCase("Pendente")) {
+				buscarProdutos();
+			}
 			
-			List<Item> Items = ItemService.getInstancia().pesquisar(Item, 0);
+			Item item = new Item();
+			item.setIdSugestaoPedido(this.getEntity().getIdSugestaoPedido());
 			
-			if (Items != null && Items.size() > 0) {
-				Optional<Item> ItemImagemOptional = this.getObjectImage(Items);
-				Items = this.getItems(Items);				
-				setEntity(new SugestaoPedido(ItemImagemOptional.isPresent() ? ItemImagemOptional.get().getUrl() : null, Items));
+			List<Item> itens = ItemService.getInstancia().pesquisar(item, 0);
+			
+			if (itens != null && itens.size() > 0) {
+				Optional<Item> ItemImagemOptional = this.getObjectImage(itens);
+				itens = this.getItems(itens);
+				this.getEntity().setImagem(ItemImagemOptional.isPresent() ? ItemImagemOptional.get().getUrl() : null);
+				this.getEntity().setItens(itens);
 			} else {
 				setEntity(new SugestaoPedido());
 			}
 		}
+		catch (Exception e) 
+		{
+			FacesMessage message = new FacesMessage(e.getMessage());
+	        message.setSeverity(FacesMessage.SEVERITY_ERROR);
+	        FacesContext.getCurrentInstance().addMessage(null, message);
+		}
+	}
+	
+	public void buscarProdutos() throws Exception {
+		this.iniciaListaProdutos();
+		
+			Cliente cliente = new Cliente();
+			cliente.setFlgAtivo("S");
+			cliente.setIdExternoOmie(this.getEntity().getCodigoDestino());
+			cliente = ClienteService.getInstancia().get(cliente, 0);
+			
+			if (cliente != null) {
+				List<ProdutoDTO> listaProduto = OmieProdutoService.getInstance().listarProdutosPorTabelaPreco(cliente.getIdTabelaPrecoOmie());
+				
+				if (listaProduto != null && listaProduto.size() > 0) {
+					for (ProdutoDTO element: listaProduto) { 
+						Produto produto = new Produto();
+						produto.setIdProduto(element.getIdProduto());
+						produto.setDesProduto(element.getDesProduto());
+						produto.setValorUnitario(element.getValorUnitario());
+						produto.setQtdLoteMinimo(element.getQtdLoteMinimo());
+						produto.setQtdMultiplo(element.getQtdMultiplo());
+						
+						this.getListaProduto().add(produto);
+					}
+				} else {
+					this.setListaProduto(null);
+				}
+			}
+	}
+	
+	private void iniciaListaProdutos()
+	{
+		ArrayList<Produto> lista = new ArrayList<Produto>();
+		Produto produto = new Produto();
+		produto.setIdProduto(null);
+		produto.setDesProduto("Escolha o Produto");		
+		lista.add(produto);
+		
+		this.setListaProduto(lista);
+	}
+	
+	public void adicionaProdutoItens() {
+		try {
+			Item item = new Item();
+			item.setIdSugestaoPedido(this.getEntity().getIdSugestaoPedido());
+			Item itemInserido = ItemService.getInstancia().inserir(item);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void removerItem(Item item) 
+	{		
+		try 
+		{
+			ItemService.getInstancia().removerItem(item);
+			
+			Item filtroItem = new Item();
+			filtroItem.setIdSugestaoPedido(this.getEntity().getIdSugestaoPedido());
+			
+			List<Item> novosItens = ItemService.getInstancia().pesquisar(filtroItem, 0);
+			this.getEntity().setItens(novosItens);
+		} 
 		catch (Exception e) 
 		{
 			FacesMessage message = new FacesMessage(e.getMessage());
@@ -86,7 +167,6 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 		{
 			if(this.getEntity() != null)
 			{
-				// this.validarAprovar();
 				this.getEntity().setItens(null);
 				SugestaoPedidoService.getInstancia().aprovar(this.getEntity());
 				this.getEntity().setOpcaoEntrega(this.getEntity().getOpcaoEntrega());
@@ -102,15 +182,6 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 	        FacesContext.getCurrentInstance().addMessage(null, message);
 		}		
 	}
-
-	/*
-	private void validarAprovar() throws Exception {
-		this.getEntity().setItens(null);
-		if(this.getEntity().getIdCliente() == null) {
-			throw new Exception("O campo Cliente é obrigatório!");			
-		}
-	}
-	*/
 	
 	public void reprovar() 
 	{		
@@ -131,39 +202,39 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 	        FacesContext.getCurrentInstance().addMessage(null, message);
 		}		
 	}
-	
-	@Override
-	protected void completarPosPesquisar() throws Exception {
-		//CARREGANDO LISTA DE CLIENTES		
-		Cliente cliente = new Cliente();
-		cliente.setFlgAtivo("S");		
-		List<Cliente> resultCli = ClienteService.getInstancia().pesquisar(cliente, 0);
-		
-		Cliente cli = new Cliente();
-		cli.setDesCliente("Todos os Clientes");
-		
-		List<Cliente> listaCliente = new ArrayList<Cliente>();
-		listaCliente.add(cli);
-		listaCliente.addAll(resultCli);
-		
-		this.setListaCliente(listaCliente);
-	}
 
-	private List<Item> getItems(List<Item> Items) {
-		return Items.stream().filter(x -> x.getValue() != null)
+	private List<Item> getItems(List<Item> itens) {
+		return itens.stream().filter(x -> x.getValue() != null)
 				             .collect(Collectors.toList());
 	}
 
-	private Optional<Item> getObjectImage(List<Item> Items) {
-		return Items.stream().filter(x -> x.getLabel().equalsIgnoreCase(ItemService.OBJECT_CAPTURE_IMAGE))
+	private Optional<Item> getObjectImage(List<Item> itens) {
+		return itens.stream().filter(x -> x.getLabel().equalsIgnoreCase(ItemService.OBJECT_CAPTURE_IMAGE))
 							 .findFirst();
 	}
 
-	public List<Cliente> getListaCliente() {
-		return listaCliente;
+	public List<Produto> getListaProduto() {
+		return listaProduto;
 	}
 
-	public void setListaCliente(List<Cliente> listaCliente) {
-		this.listaCliente = listaCliente;
+	public void setListaProduto(List<Produto> listaProduto) {
+		this.listaProduto = listaProduto;
 	}
+
+	public BigInteger getIdProdutoAdicionar() {
+		return idProdutoAdicionar;
+	}
+
+	public void setIdProdutoAdicionar(BigInteger idProdutoAdicionar) {
+		this.idProdutoAdicionar = idProdutoAdicionar;
+	}
+
+	public BigInteger getQtdSolicitada() {
+		return qtdSolicitada;
+	}
+
+	public void setQtdSolicitada(BigInteger qtdSolicitada) {
+		this.qtdSolicitada = qtdSolicitada;
+	}
+	
 }
