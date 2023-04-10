@@ -56,46 +56,12 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 		MenuControl.ativarSubMenu("flgMenuManCli");
 	}
 	
-	public void visualizar()
-	{
-		try
-		{
-			if (this.getEntity().getStatus().equalsIgnoreCase("Pendente")) {
-				buscarProdutos();
-			}
-			
-			Item item = new Item();
-			item.setIdSugestaoPedido(this.getEntity().getIdSugestaoPedido());
-			
-			List<Item> itens = ItemService.getInstancia().pesquisar(item, 0);
-			
-			if (itens != null && itens.size() > 0) {
-				Optional<Item> ItemImagemOptional = this.getObjectImage(itens);
-				itens = this.getItems(itens);
-				this.getEntity().setImagem(ItemImagemOptional.isPresent() ? ItemImagemOptional.get().getUrl() : null);
-				this.getEntity().setItens(itens);
-			} else {
-				setEntity(new SugestaoPedido());
-			}
-		}
-		catch (Exception e) 
-		{
-			FacesMessage message = new FacesMessage(e.getMessage());
-	        message.setSeverity(FacesMessage.SEVERITY_ERROR);
-	        FacesContext.getCurrentInstance().addMessage(null, message);
-		}
-	}
-	
 	@Override
 	public void preparaAlterar() {
 		try
 		{
 			if (validarAcesso(Variaveis.ACAO_PREPARA_ALTERAR))
-			{
-				if (getEntity().getIdOpcaoEntrega() == null) {
-					throw new Exception("O campo Opção de Entrega é obrigatório!");
-				}
-				
+			{	
 				Pedido pedido = new Pedido();
 				pedido.setIdUsuarioCad(util.getUsuarioLogado().getIdUsuario());
 				pedido.setDatCadastro(new Date());
@@ -132,7 +98,10 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 				
 				setPedidoResult(pedido);
 				
-				buscarProdutos();
+				if (this.getEntity().getStatus().equalsIgnoreCase("Pendente")) {
+					buscarProdutos();
+				}
+
 				setCurrentState(STATE_EDIT);
 				setListaAlterar();
 			}
@@ -259,11 +228,22 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 		}
 	}
 	
-	public void atualizarQuantidade(Item item) 
+	public void atualizarQuantidade(Produto produto) 
 	{
 		try 
 		{
-			ItemService.getInstancia().atualizarQuantidade(item);
+			for (Produto element : pedidoResult.getListaProduto()) {
+				if (element.getIdProduto() == produto.getIdProduto()) {
+					element.setQtdSolicitada(produto.getQtdSolicitada());
+					
+					Item item = new Item();
+					item.setIntegId(element.getIdProduto());
+					item.setIdSugestaoPedido(this.getEntity().getIdSugestaoPedido());
+					item.setValue(produto.getQtdSolicitada());
+					
+					ItemService.getInstancia().atualizarQuantidade(item);
+				}
+			}
 		}
 		catch (Exception e) 
 		{
@@ -304,6 +284,9 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 		{
 			if(this.getEntity() != null)
 			{
+				if (getEntity().getIdOpcaoEntrega() == null) {
+					throw new Exception("O campo Opção de Entrega é obrigatório!");
+				}
 				this.getEntity().setItens(null);
 				SugestaoPedidoService.getInstancia().aprovar(this.getEntity());
 				this.getEntity().setOpcaoEntrega(this.getEntity().getOpcaoEntrega());
