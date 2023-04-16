@@ -28,6 +28,7 @@ import br.com.a2dm.spdm.entity.SugestaoPedido;
 import br.com.a2dm.spdm.omie.service.OmieProdutoService;
 import br.com.a2dm.spdm.service.ClienteService;
 import br.com.a2dm.spdm.service.ItemService;
+import br.com.a2dm.spdm.service.PedidoService;
 import br.com.a2dm.spdm.service.SugestaoPedidoService;
 
 @RequestScoped
@@ -63,18 +64,6 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 			if (validarAcesso(Variaveis.ACAO_PREPARA_ALTERAR))
 			{	
 				Pedido pedido = new Pedido();
-				pedido.setIdUsuarioCad(util.getUsuarioLogado().getIdUsuario());
-				pedido.setDatCadastro(new Date());
-				pedido.setFlgAtivo("S");
-				pedido.setDatPedido(new Date());
-				pedido.setIdOpcaoEntrega(getEntity().getIdOpcaoEntrega());
-				
-				Cliente cliente = new Cliente();
-				cliente.setIdCliente(getEntity().getCodigoDestino());
-				
-				cliente = ClienteService.getInstancia().get(cliente, 0);
-				
-				pedido.setCliente(cliente);
 				pedido.setListaProduto(new ArrayList<>());
 				
 				Item item = new Item();
@@ -84,6 +73,8 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 				
 				if (itens != null
 						&& itens.size() > 0) {
+					Optional<Item> ItemImagemOptional = this.getObjectImage(itens);
+					this.getEntity().setImagem(ItemImagemOptional.isPresent() ? ItemImagemOptional.get().getUrl() : null);
 					for (Item element: itens) {
 						if (element.getIntegId() != null) {
 							Produto produto = new Produto();
@@ -287,9 +278,31 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 				if (getEntity().getIdOpcaoEntrega() == null) {
 					throw new Exception("O campo Opção de Entrega é obrigatório!");
 				}
+				if (existeItemSemValor()) {
+					throw new Exception("Todos produtos devem possuir quantidade maior que 0!");
+				}
+				
+				// CADASTRANDO PEDIDO NA OMIE
+				Cliente cliente = new Cliente();
+				cliente.setIdExternoOmie(getEntity().getCodigoDestino());
+				cliente = ClienteService.getInstancia().get(cliente, 0);
+				
+				this.getPedidoResult().setCliente(cliente);
+				this.getPedidoResult().setIdUsuarioCad(util.getUsuarioLogado().getIdUsuario());
+				this.getPedidoResult().setDatCadastro(new Date());
+				this.getPedidoResult().setFlgAtivo("S");
+				this.getPedidoResult().setDatPedido(new Date());
+				this.getPedidoResult().setIdOpcaoEntrega(getEntity().getIdOpcaoEntrega());
+				this.getPedidoResult().setIdCodigoPedidoIntegracao(getEntity().getCodigoDestino());
+				this.getPedidoResult().setObservacao("");
+				
+				PedidoService.getInstancia().inserirPedido(this.getPedidoResult());
+				
+				// INSERINDO ITENS
 				this.getEntity().setItens(null);
+				
 				SugestaoPedidoService.getInstancia().aprovar(this.getEntity());
-				this.getEntity().setOpcaoEntrega(this.getEntity().getOpcaoEntrega());
+				
 				FacesMessage message = new FacesMessage("A Sugestão de Pedido foi aprovada com sucesso!");
 				message.setSeverity(FacesMessage.SEVERITY_INFO);
 				FacesContext.getCurrentInstance().addMessage(null, message);
@@ -321,6 +334,16 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 	        message.setSeverity(FacesMessage.SEVERITY_ERROR);
 	        FacesContext.getCurrentInstance().addMessage(null, message);
 		}		
+	}
+	
+	private boolean existeItemSemValor() {
+		for (Produto element : pedidoResult.getListaProduto()) {
+			if (element.getQtdSolicitada() == null || element.getQtdSolicitada().equals(BigInteger.ZERO)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private List<Item> getItems(List<Item> itens) {

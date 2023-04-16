@@ -129,8 +129,15 @@
                 	
                 	<rich:panel id="panelListaProduto">
 	               		<f:facet name="header">
-		                    Lista dos Produtos
-		                </f:facet>
+						   <div style="display: flex; align-items: center;">
+						      <span style="padding-right: 15px;">Lista dos Produtos</span>
+						      <h:panelGroup rendered="#{crudBean.entity.imagem != null}">
+						         <h:outputLink value="#{crudBean.entity.imagem}" target="_blank">
+						            <h:graphicImage value="../images/link.png" title="Imagem" style="border:none; width: 18px; height: 18px;"/>
+						         </h:outputLink>
+						      </h:panelGroup>
+						   </div>
+						</f:facet>
 		               	
 						<h:panelGroup id="panelProdutoResult" layout="block">
 						    <div class="box-content">
