@@ -25,6 +25,7 @@ import br.com.a2dm.spdm.entity.Item;
 import br.com.a2dm.spdm.entity.Pedido;
 import br.com.a2dm.spdm.entity.Produto;
 import br.com.a2dm.spdm.entity.SugestaoPedido;
+import br.com.a2dm.spdm.omie.service.OmieProdutoEstruturaService;
 import br.com.a2dm.spdm.omie.service.OmieProdutoService;
 import br.com.a2dm.spdm.service.ClienteService;
 import br.com.a2dm.spdm.service.ItemService;
@@ -73,8 +74,10 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 				
 				if (itens != null
 						&& itens.size() > 0) {
+					
 					Optional<Item> ItemImagemOptional = this.getObjectImage(itens);
 					this.getEntity().setImagem(ItemImagemOptional.isPresent() ? ItemImagemOptional.get().getUrl() : null);
+					
 					for (Item element: itens) {
 						if (element.getIntegId() != null) {
 							Produto produto = new Produto();
@@ -82,6 +85,9 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 							produto.setDesProduto(element.getLabel());
 							produto.setQtdSolicitada(element.getValue());
 							produto.setFlgAtivo("S");
+							produto.setUnidade(OmieProdutoEstruturaService.getInstance().
+									obterProdutoEstrutura(produto.getIdProduto()).
+									getIdentDTO().getUnidProduto()); 
 							pedido.getListaProduto().add(produto);							
 						}
 					}
@@ -130,7 +136,6 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 					produto.setValorUnitario(element.getValorUnitario());
 					produto.setQtdLoteMinimo(element.getQtdLoteMinimo());
 					produto.setQtdMultiplo(element.getQtdMultiplo());
-					
 					this.getListaProduto().add(produto);
 				}
 			} else {
@@ -172,6 +177,10 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 			produto.setDesProduto(produtoOptional.get().getDesProduto());
 			produto.setQtdSolicitada(this.getQtdSolicitada());
 			produto.setFlgAtivo("S");
+			produto.setUnidade(OmieProdutoEstruturaService.getInstance().
+					obterProdutoEstrutura(produto.getIdProduto()).
+					getIdentDTO().getUnidProduto()); 
+			
 			
 			if (this.pedidoResult != null &&
 					(this.pedidoResult.getListaProduto() == null || this.pedidoResult.getListaProduto().size() <= 0)) {
@@ -278,6 +287,7 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 				if (getEntity().getIdOpcaoEntrega() == null) {
 					throw new Exception("O campo Opção de Entrega é obrigatório!");
 				}
+				
 				if (existeItemSemValor()) {
 					throw new Exception("Todos produtos devem possuir quantidade maior que 0!");
 				}
