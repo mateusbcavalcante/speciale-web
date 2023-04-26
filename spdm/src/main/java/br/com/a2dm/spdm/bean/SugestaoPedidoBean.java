@@ -2,6 +2,7 @@ package br.com.a2dm.spdm.bean;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -46,6 +47,8 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 	private PedidoDTO pedidoDTO;
 	private Pedido pedidoResult;
 	private BigInteger idProdutoRemover;
+	private String stringData;
+	private String stringDataEntrega;
 	
 	public SugestaoPedidoBean()
 	{
@@ -64,6 +67,10 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 		{
 			if (validarAcesso(Variaveis.ACAO_PREPARA_ALTERAR))
 			{	
+				buscarProdutos();
+				this.getEntity().setDatPedido(new Date());
+				this.atualizarStringDataInsert();
+				
 				Pedido pedido = new Pedido();
 				pedido.setListaProduto(new ArrayList<>());
 				
@@ -87,18 +94,21 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 							produto.setFlgAtivo("S");
 							produto.setUnidade(OmieProdutoEstruturaService.getInstance().
 									obterProdutoEstrutura(produto.getIdProduto()).
-									getIdentDTO().getUnidProduto()); 
-							pedido.getListaProduto().add(produto);							
+									getIdentDTO().getUnidProduto());
+							
+							this.setProduto(new Produto());
+							this.getProduto().setIdProduto(element.getIntegId());
+							this.buscarInformacoes();
+							
+							if (produtoSelecionado != null) {								
+								produto.setValorUnitario(produtoSelecionado.getValorUnitario());
+								pedido.getListaProduto().add(produto);							
+							}
 						}
 					}
 				}
 				
 				setPedidoResult(pedido);
-				
-				if (this.getEntity().getStatus().equalsIgnoreCase("Pendente")) {
-					buscarProdutos();
-				}
-
 				setCurrentState(STATE_EDIT);
 				setListaAlterar();
 			}
@@ -257,7 +267,9 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 		this.setInformacao(null);
 		if (this.getProduto().getIdProduto() != null && this.getProduto().getIdProduto().longValue() > 0) {
 			Optional<Produto> produtoOptional = this.getListaProduto().stream()
-					                                   .filter(x -> x.getIdProduto() == this.getProduto().getIdProduto())
+					                                   .filter(x -> x.getIdProduto() != null 
+					                                        && this.getProduto().getIdProduto().longValue() > 0 
+					                                        && x.getIdProduto().longValue() == this.getProduto().getIdProduto().longValue())
 					                                   .findFirst();
 			
 			if (produtoOptional.isPresent()) {
@@ -301,9 +313,8 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 				this.getPedidoResult().setIdUsuarioCad(util.getUsuarioLogado().getIdUsuario());
 				this.getPedidoResult().setDatCadastro(new Date());
 				this.getPedidoResult().setFlgAtivo("S");
-				this.getPedidoResult().setDatPedido(new Date());
+				this.getPedidoResult().setDatPedido(getEntity().getDatPedido());
 				this.getPedidoResult().setIdOpcaoEntrega(getEntity().getIdOpcaoEntrega());
-				this.getPedidoResult().setIdCodigoPedidoIntegracao(getEntity().getCodigoDestino());
 				this.getPedidoResult().setObservacao("");
 				
 				PedidoService.getInstancia().inserirPedido(this.getPedidoResult());
@@ -354,6 +365,62 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 		}
 
 		return false;
+	}
+	
+	public void atualizarStringDataInsert()
+	{
+		String nome = this.atualizarStringData(this.getEntity().getDatPedido());
+		this.atualizarStringDataEntrega(this.getEntity().getDatPedido(), nome);
+	}
+	
+	public String atualizarStringData(Date data)
+	{
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(data);
+		
+		String nome = "";
+		
+		int dia = calendar.get(Calendar.DAY_OF_WEEK);
+		
+		switch(dia)
+		{
+		  case Calendar.SUNDAY: nome = "Domingo";break;
+		  case Calendar.MONDAY: nome = "Segunda-feira";break;
+		  case Calendar.TUESDAY: nome = "Terça-feira";break;
+		  case Calendar.WEDNESDAY: nome = "Quarta-feira";break;
+		  case Calendar.THURSDAY: nome = "Quinta-feira";break;
+		  case Calendar.FRIDAY: nome = "Sexta-feira";break;
+		  case Calendar.SATURDAY: nome = "Sábado";break;
+		}
+				
+		this.setStringData(nome);
+		return nome;
+	}
+	
+	public void atualizarStringDataEntrega(Date data, String nome) {
+		Calendar c = Calendar.getInstance(); 
+		c.setTime(data);
+		
+		if (nome.equalsIgnoreCase("Sábado")) {
+			c.add(Calendar.DATE, 2);
+		} else {
+			c.add(Calendar.DATE, 1);
+		}
+		
+		int dia = c.get(Calendar.DAY_OF_WEEK);
+		
+		switch(dia)
+		{
+		  case Calendar.SUNDAY: nome = "Domingo";break;
+		  case Calendar.MONDAY: nome = "Segunda-feira";break;
+		  case Calendar.TUESDAY: nome = "Terça-feira";break;
+		  case Calendar.WEDNESDAY: nome = "Quarta-feira";break;
+		  case Calendar.THURSDAY: nome = "Quinta-feira";break;
+		  case Calendar.FRIDAY: nome = "Sexta-feira";break;
+		  case Calendar.SATURDAY: nome = "Sábado";break;
+		}
+		
+		this.setStringDataEntrega(nome);
 	}
 
 	private List<Item> getItems(List<Item> itens) {
@@ -428,5 +495,21 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 
 	public void setIdProdutoRemover(BigInteger idProdutoRemover) {
 		this.idProdutoRemover = idProdutoRemover;
+	}
+
+	public String getStringData() {
+		return stringData;
+	}
+
+	public void setStringData(String stringData) {
+		this.stringData = stringData;
+	}
+
+	public String getStringDataEntrega() {
+		return stringDataEntrega;
+	}
+
+	public void setStringDataEntrega(String stringDataEntrega) {
+		this.stringDataEntrega = stringDataEntrega;
 	}
 }

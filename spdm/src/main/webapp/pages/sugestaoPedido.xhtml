@@ -19,6 +19,8 @@
 		<t:saveState value="#{crudBean.pedidoResult}" />
 		<t:saveState value="#{crudBean.produto}" />
 		<t:saveState value="#{crudBean.produtoSelecionado}" />
+		<t:saveState value="#{crudBean.stringData}" />
+		<t:saveState value="#{crudBean.stringDataEntrega}" />
 		<t:saveState value="#{crudBean.informacao}" />
 	</ui:define>
 
@@ -43,33 +45,33 @@
 		</h:panelGroup>
 		
 		<h:panelGroup id="panelGroupDeEdicao" style="height:100%;width:100%;" rendered="#{crudBean.updating}">
-			<f:subview id="viewEdicao">			
+			<f:subview id="viewEdicao">
 				<div class="box-body">
-					<rich:panel id="panelInfoGeral" rendered="#{crudBean.entity.status eq 'Aprovado'}">
-						<f:facet name="header">
-		                    Geral
-		                </f:facet>
+					<h:outputText value="Se a opção escolhida for 'Entrega', pode conter taxa de entrega." style="color: #9e5d28"></h:outputText>
+				</div>
 						
-						<div class="form-group">
-							<h:panelGroup rendered="#{not empty crudBean.entity.idOpcaoEntrega}">
-								<div class="form-group">
-			                    	<label for="inputEmail3" class="col-sm-2 control-label">Opção de Entrega: </label>
-			                    	<div class="col-sm-6">
-			                        	<h:outputText value="#{crudBean.entity.opcaoEntrega.desOpcaoEntrega}" styleClass="form-control" readonly="true"/>
-			                    	</div>
-			                    </div>
-			                </h:panelGroup>
-		                </div>
-					</rich:panel>
-					
-					<br/>
-				
-					<rich:panel id="panelPesquisaProduto" rendered="#{crudBean.entity.status eq 'Pendente'}">
-	               		<f:facet name="header">
-		                    Adicionar Produto
-		                </f:facet>
-		                
+				<div class="box-body">
+					<h:panelGroup id="panelGroupDeAlterar" rendered="#{crudBean.editing}">
 		                <div class="form-group">
+		                  <label for="inputEmail3" class="col-sm-2 control-label">Data da Produção *</label>
+		                  <div class="col-sm-2" style="width: 13% !important; padding-right: 30px;">
+			               	  <rich:calendar value="#{crudBean.entity.datPedido}" buttonClass="glyphicon glyphicon-calendar" inputSize="9" buttonIcon="../images/calendar.png"  datePattern="dd/MM/yyyy" inputClass="form-control" showWeeksBar="false" enableManualInput="true" oninputkeypress="return formataData(event,this);" maxlength="10">
+			               	  	<a4j:ajax event="change" listener="#{crudBean.atualizarStringDataInsert}" render="panelGroupDeAlterar, panelEntrega"/>
+		                	  	<a4j:ajax event="inputchange" listener="#{crudBean.atualizarStringDataInsert}" render="panelGroupDeAlterar, panelEntrega"/>
+			               	  </rich:calendar>
+		                  </div>
+		               	</div>
+		               	
+		               	<h:panelGroup layout="block" id="panelEntrega">
+			               	<div class="form-group">
+			                  <label for="inputEmail3" class="col-sm-2 control-label">Entrega</label>
+			               	  <label for="inputEmail3" class="col-sm-2 control-label" style="text-align: left; color: #800000">
+			                   	<h:outputText value="#{crudBean.stringDataEntrega}"/>
+			                  </label>
+			               	</div>
+		               	</h:panelGroup>
+					
+						<div class="form-group">
 			                <h:panelGroup rendered="#{empty crudBean.entity.idOpcaoEntrega}">
 			                	<label for="inputEmail3" class="col-sm-2 control-label">Opção de Entrega *</label>
 			                	<div class="col-sm-10">
@@ -81,6 +83,25 @@
 							    </div>
 							</h:panelGroup>
 						</div>
+							
+						<div class="form-group">
+							<h:panelGroup rendered="#{not empty crudBean.entity.idOpcaoEntrega}">
+								<div class="form-group">
+			                    	<label for="inputEmail3" class="col-sm-2 control-label">Opção de Entrega: </label>
+			                    	<div class="col-sm-6">
+			                        	<h:outputText value="#{crudBean.entity.opcaoEntrega.desOpcaoEntrega}" styleClass="form-control" readonly="true"/>
+			                    	</div>
+			                    </div>
+			                </h:panelGroup>
+		                </div>
+					</h:panelGroup>					
+					
+					<br/>
+				
+					<rich:panel id="panelPesquisaProduto" rendered="#{crudBean.entity.status eq 'Pendente'}">
+	               		<f:facet name="header">
+		                    Adicionar Produto
+		                </f:facet>
 		                
 		                <h:panelGroup layout="block" id="panelProduto">
 			                <div class="form-group">
@@ -131,7 +152,13 @@
 	               		<f:facet name="header">
 						   <div style="display: flex; align-items: center;">
 						      <span style="padding-right: 15px;">Lista dos Produtos</span>
+						      
+						      <br/>
+						      
 						      <h:panelGroup rendered="#{crudBean.entity.imagem != null}">
+							     <div class="box-body">
+									<h:outputText value="Anexo:" style="color: #9e5d28"></h:outputText>
+								 </div>
 						         <h:outputLink value="#{crudBean.entity.imagem}" target="_blank">
 						            <h:graphicImage value="../images/link.png" title="Imagem" style="border:none; width: 18px; height: 18px;"/>
 						         </h:outputLink>
@@ -225,34 +252,55 @@
 						<f:facet name="header">
 							<rich:columnGroup>
 								<rich:column style="width: 10%; text-align: center;">
+									Número da Ordem
+								</rich:column>
+								<rich:column style="width: 10%; text-align: center;">
+									Código do Roteiro
+								</rich:column>
+								<rich:column style="width: 22%; text-align: center;">
+									Cliente
+								</rich:column>
+								<rich:column style="width: 17%; text-align: center;">
+									Nome do Agente
+								</rich:column>
+								<rich:column style="width: 15%; text-align: center;">
 									Data da Sugestão
 								</rich:column>
 								<rich:column style="width: 15%; text-align: center;">
-									Nome do Agente
+									Data da Produção
 								</rich:column>
-								<rich:column style="width: 30%; text-align: center;">
-									Cliente
-								</rich:column>
-								<rich:column style="width: 20%; text-align: center;">
+								<rich:column style="width: 7%; text-align: center;">
 									Status
 								</rich:column>
 								<rich:column style="width: 3%; text-align: center;" />
 							</rich:columnGroup>
 						</f:facet>
 						
+						<rich:column style="text-align: right;">
+							<h:outputText value="#{rst.orderNumber}" />
+						</rich:column>
+						
+						<rich:column style="text-align: right;">
+							<h:outputText value="#{rst.codigoRoteiro}" />
+						</rich:column>
+						
+						<rich:column style="text-align: left;">
+							<h:outputText value="#{rst.nomeFantasiaDest}" />
+						</rich:column>
+						
+						<rich:column style="text-align: left;">
+							<h:outputText value="#{rst.agentName}" />
+						</rich:column>
+						
 						<rich:column style="text-align: center;">
 							<h:outputText value="#{rst.eventDth}" />
 						</rich:column>
 						
 						<rich:column style="text-align: center;">
-							<h:outputText value="#{rst.agentName}" />
+							<h:outputText value="#{rst.datPedido}" />
 						</rich:column>
 						
-						<rich:column style="text-align: center;">
-							<h:outputText value="#{rst.nomeFantasiaDest}" />
-						</rich:column>
-						
-						<rich:column style="text-align: center;">
+						<rich:column style="text-align: left;">
 							<h:outputText value="#{rst.status}" />
 						</rich:column>
 						
