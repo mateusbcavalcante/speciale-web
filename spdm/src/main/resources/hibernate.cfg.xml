@@ -61,6 +61,7 @@
 		<mapping class="br.com.a2dm.spdm.entity.OpcaoEntrega"/>
 		<mapping class="br.com.a2dm.spdm.entity.Tipo"/>
 		<mapping class="br.com.a2dm.spdm.entity.Feriado"/>
+		<mapping class="br.com.a2dm.spdm.entity.NaoConformidade"/>
 		
 	</session-factory>
 </hibernate-configuration>
