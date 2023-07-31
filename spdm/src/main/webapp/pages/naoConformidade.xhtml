@@ -13,7 +13,6 @@
 				template="crud_template.xhtml">
 			
 	<ui:param name="crudBean" value="#{naoConformidadeBean}" />
-	<ui:param name="uploadManagedBean" value="#{uploadManagedBean}" />
 	
 	<ui:define name="saveStateObjectsDefined">
 		<t:saveState value="#{crudBean.listaCliente}" />
@@ -128,13 +127,6 @@
 								    </div>
 								</div>
 								
-							    <div class="form-group row">
-							        <label for="inputEmail3" class="col-sm-2 control-label">Foto</label>
-							        <div class="col-md-6">
-							            <h:inputFile value="#{uploadManagedBean.part}" />
-							        </div>
-							    </div>
-							    
 		                	</rich:panel>
 		                </rich:tab>
 	                </rich:tabPanel>
@@ -180,11 +172,11 @@
 								<rich:column style="width: 10%; text-align: center;">
 									Observação
 								</rich:column>
-								<rich:column style="width: 3%; text-align: center;">
-									Foto
-								</rich:column>
 								<rich:column style="width: 10%; text-align: center;">
 									Lote
+								</rich:column>
+								<rich:column style="width: 3%; text-align: center;">
+									Foto
 								</rich:column>
 								<rich:column style="width: 3%; text-align: center;" />
 								<rich:column style="width: 3%; text-align: center;" />
@@ -224,17 +216,13 @@
 						</rich:column>
 						
 						<rich:column style="text-align: left;">
-							<h:outputText value="#{rst.foto}" />
-						</rich:column>
-						
-						<rich:column style="text-align: left;">
 							<h:outputText value="#{rst.lote}" />
 						</rich:column>
 						
 						<rich:column style="text-align: center; vertical-align: middle;">
-							<a4j:commandButton image="../images/edit.png" style="border:none; width: 18px; height: 18px;" title="ALTERAR" action="#{crudBean.preparaAlterar}" render="formulario, panelTitle" >
-								<f:setPropertyActionListener target="#{crudBean.entity}" value="#{rst}" />
-							</a4j:commandButton>
+							<h:commandLink action="#{uploadBean.preparaUpload(crudBean.getIdNaoConformidade())}">
+							    <img src="../images/foto.png" style="border:none; width:18px; height:18px;" title="FOTO"/>
+							</h:commandLink>
 						</rich:column>
 						
 						<rich:column style="text-align: center; vertical-align: middle;">

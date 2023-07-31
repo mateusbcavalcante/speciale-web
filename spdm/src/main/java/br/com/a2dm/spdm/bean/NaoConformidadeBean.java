@@ -1,11 +1,15 @@
 package br.com.a2dm.spdm.bean;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.RequestScoped;
+import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 
 import br.com.a2dm.brcmn.dto.ProdutoDTO;
@@ -29,7 +33,9 @@ public class NaoConformidadeBean extends AbstractBean<NaoConformidade, NaoConfor
 	private Produto produto;
 	private String informacao;
 	
-	
+	@ManagedProperty("#{uploadBean}")
+	private UploadBean uploadBean;
+
 	public NaoConformidadeBean()
 	{
 		super(NaoConformidadeService.getInstancia());
@@ -133,6 +139,22 @@ public class NaoConformidadeBean extends AbstractBean<NaoConformidade, NaoConfor
 		}
 	}
 	
+	public BigInteger getIdNaoConformidade() {
+		try {
+			NaoConformidade nc = NaoConformidadeService.getInstancia().pesquisar(getEntity(), 0).get(0);
+			return nc.getIdNaoConformidade();
+		}catch (Exception e)
+		{
+			FacesMessage message = new FacesMessage(e.getMessage());
+			message.setSeverity(FacesMessage.SEVERITY_ERROR);
+			if(e.getMessage() == null)
+				FacesContext.getCurrentInstance().addMessage("", message);
+			else
+				FacesContext.getCurrentInstance().addMessage(null, message);
+		}
+		return null;
+	}
+	
 	@Override
 	public void inserir(ActionEvent event) {
 		super.inserir(event);
@@ -176,6 +198,14 @@ public class NaoConformidadeBean extends AbstractBean<NaoConformidade, NaoConfor
 
 	public void setListaProduto(List<Produto> listaProduto) {
 		this.listaProduto = listaProduto;
+	}
+	
+	public UploadBean getUploadBean() {
+		return uploadBean;
+	}
+
+	public void setUploadBean(UploadBean uploadBean) {
+		this.uploadBean = uploadBean;
 	}
 	
 }
