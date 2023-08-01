@@ -23,6 +23,7 @@ import br.com.a2dm.spdm.entity.Produto;
 import br.com.a2dm.spdm.omie.service.OmieProdutoService;
 import br.com.a2dm.spdm.service.ClienteService;
 import br.com.a2dm.spdm.service.NaoConformidadeService;
+import br.com.a2dm.spdm.service.ProdutoService;
 
 @RequestScoped
 @ManagedBean

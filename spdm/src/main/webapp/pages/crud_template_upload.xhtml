@@ -12,6 +12,7 @@
 	
 	<ui:param name="pageTitle" value="#{crudBean.fullTitle}" />
 	
+<<<<<<< Upstream, based on branch 'SP_JP_24_07' of https://github.com/mateusbcavalcante/speciale-web.git
 <<<<<<< HEAD
 	<ui:define name="saveStateObjects">
 		<t:saveState value="#{crudBean.searchObject}" />
@@ -59,6 +60,36 @@
 			<h:outputText value=" "/>
 			<a4j:commandButton id="cancelar" styleClass="btn btn-primary" value="Cancelar (C)" accesskey="C" actionListener="#{crudBean.cancelar}" render="pnFrm, panelTitle" />
 >>>>>>> 9135b59 (ajuste nao conformidade)
+=======
+	<ui:define name="pageIcon">
+		<a4j:commandLink actionListener="#{crudBean.clean}" title="Limpar Tela" rendered="#{crudBean.searching}" render="pnFrm, panelTitle, comentTela"> <img src="../images/eraser.png" style="width: 18px; height: 16px;"/> </a4j:commandLink>
+	</ui:define>
+	
+	<ui:define name="saveStateObjects">
+		<t:saveState value="#{crudBean.searchObject}" />
+		<t:saveState value="#{crudBean.currentState}" />
+		<t:saveState value="#{crudBean.entity}" />		
+		<t:saveState value="#{crudBean.searchResult}" />
+	</ui:define>
+				
+	<ui:define name="buttonItens" style="height:100%; width:100%;">
+		<!-- Painel dos botoes de pesquisa -->
+		<h:panelGroup rendered="#{crudBean.searching}">
+			<a4j:commandButton id="pesquisar" styleClass="btn btn-primary" value="Pesquisar (P)" accesskey="P" actionListener="#{crudBean.pesquisar}" render="tblResult"/>
+			<h:outputText value=" "/>
+			<a4j:commandButton id="preparaInserir" styleClass="btn btn-primary" value="Novo (N)" accesskey="N" actionListener="#{crudBean.preparaInserir}" render="pnFrm, panelTitle" />			
+		</h:panelGroup>
+		<rich:popupPanel id="grafico" height="85" width="350">
+		</rich:popupPanel>	
+		
+		<!-- Painel dos botoes de edicao -->
+		<h:panelGroup rendered="#{crudBean.updating || crudBean.viewing}">			
+			<a4j:commandButton id="inserir" styleClass="btn btn-primary" value="Gravar (G)" accesskey="G" actionListener="#{crudBean.inserir}" rendered="#{crudBean.inserting}" render="pnFrm, panelTitle"/>
+			<h:outputText value=" "/>
+			<a4j:commandButton id="alterar" styleClass="btn btn-primary" value="Alterar (A)" accesskey="A" actionListener="#{crudBean.alterar}" rendered="#{crudBean.editing}" render="pnFrm, panelTitle"/>
+			<h:outputText value=" "/>
+			<a4j:commandButton id="cancelar" styleClass="btn btn-primary" value="Cancelar (C)" accesskey="C" actionListener="#{crudBean.cancelar}" render="pnFrm, panelTitle" />
+>>>>>>> 9135b59 ajuste nao conformidade
 		</h:panelGroup>
 		
 	</ui:define>

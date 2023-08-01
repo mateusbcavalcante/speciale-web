@@ -128,9 +128,12 @@
 								        <h:inputTextarea value="#{crudBean.entity.observacao}" styleClass="form-control" style="width:700px; display: initial;" rows="5" />
 								    </div>
 								</div>
+<<<<<<< Upstream, based on branch 'SP_JP_24_07' of https://github.com/mateusbcavalcante/speciale-web.git
 <<<<<<< HEAD
 								
 =======
+=======
+>>>>>>> 9135b59 ajuste nao conformidade
 							    
 >>>>>>> 9135b59 (ajuste nao conformidade)
 		                	</rich:panel>
@@ -174,6 +177,7 @@
 								</rich:column>
 								<rich:column style="width: 10%; text-align: center;">
 									Observação
+<<<<<<< Upstream, based on branch 'SP_JP_24_07' of https://github.com/mateusbcavalcante/speciale-web.git
 <<<<<<< HEAD
 								</rich:column>
 =======
@@ -185,6 +189,13 @@
 								<rich:column style="width: 3%; text-align: center;">
 									Foto
 								</rich:column>
+								<rich:column style="width: 3%; text-align: center;" />
+=======
+								</rich:column>								
+								<rich:column style="width: 10%; text-align: center;">
+									Lote
+								</rich:column>
+>>>>>>> 9135b59 ajuste nao conformidade
 								<rich:column style="width: 3%; text-align: center;" />
 								<rich:column style="width: 3%; text-align: center;" />
 								<rich:column style="width: 3%; text-align: center;" />
@@ -218,21 +229,28 @@
 						<rich:column style="text-align: left;">
 							<h:outputText value="#{rst.observacao}" />
 						</rich:column>
+<<<<<<< Upstream, based on branch 'SP_JP_24_07' of https://github.com/mateusbcavalcante/speciale-web.git
 <<<<<<< HEAD
 						
 =======
 												
 >>>>>>> 9135b59 (ajuste nao conformidade)
+=======
+												
+>>>>>>> 9135b59 ajuste nao conformidade
 						<rich:column style="text-align: left;">
 							<h:outputText value="#{rst.lote}" />
 						</rich:column>
 						
 						<rich:column style="text-align: center; vertical-align: middle;">
+<<<<<<< Upstream, based on branch 'SP_JP_24_07' of https://github.com/mateusbcavalcante/speciale-web.git
 <<<<<<< HEAD
 							<h:commandLink action="#{uploadBean.preparaUpload(crudBean.getIdNaoConformidade())}">
 							    <img src="../images/foto.png" style="border:none; width:18px; height:18px;" title="FOTO"/>
 							</h:commandLink>
 =======
+=======
+>>>>>>> 9135b59 ajuste nao conformidade
 							<h:commandButton image="../images/upload.png" style="border:none; width: 18px; height: 18px;" title="UPLOAD" action="#{uploadBean.preparaUpload}">
 								<f:setPropertyActionListener target="#{uploadBean.naoConformidade}" value="#{rst}" />
 							</h:commandButton>							
