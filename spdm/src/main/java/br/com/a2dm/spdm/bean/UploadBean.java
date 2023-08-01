@@ -1,7 +1,5 @@
 package br.com.a2dm.spdm.bean;
 
-import java.util.Scanner;
-
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
@@ -9,6 +7,8 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
+import br.com.a2dm.brcmn.entity.Parametro;
+import br.com.a2dm.brcmn.service.ParametroService;
 import br.com.a2dm.brcmn.util.jsf.AbstractBean;
 import br.com.a2dm.spdm.entity.NaoConformidade;
 import br.com.a2dm.spdm.service.NaoConformidadeService;
@@ -19,12 +19,14 @@ public class UploadBean extends AbstractBean<NaoConformidade, NaoConformidadeSer
 {
 	private Part file;
 	private NaoConformidade naoConformidade;
+	private String path;
 	
 	public UploadBean()
 	{
 		super(NaoConformidadeService.getInstancia());
 		this.ACTION_SEARCH = "upload";
 		this.pageTitle = "Upload de Não Conformidade";
+		this.path = "https://specialepaes.com/wp-content/uploads/2016/12/speciale-paes-pao-bananacomcanela-1.png";
 	}
 		
 	public String preparaUpload()
@@ -38,6 +40,16 @@ public class UploadBean extends AbstractBean<NaoConformidade, NaoConformidadeSer
 			naoConformidade = NaoConformidadeService.getInstancia().get(naoConformidade, 0);
 			
 			this.setNaoConformidade(naoConformidade);
+						
+			if(naoConformidade != null) {
+				Parametro parametro = new Parametro();
+				parametro.setDescricao("PATH_IMG_NAO_CONFORMIDADE");
+				parametro = ParametroService.getInstancia().get(parametro, 0);
+				
+				this.path = parametro.getValor() + "NC" + naoConformidade.getIdNaoConformidade();
+			}
+			
+			
 		}
 		catch (Exception e)
 		{
@@ -95,19 +107,12 @@ public class UploadBean extends AbstractBean<NaoConformidade, NaoConformidadeSer
 				throw new Exception("Selecione um arquivo para alterar a imagem.");
 			}
 			
-			new Scanner(file.getInputStream()).useDelimiter("\\A").next();
+			//new Scanner(file.getInputStream()).useDelimiter("\\A").next();
 			
-			this.validarArquivo(file);
-            
-//            EstabelecimentoImagem imagem = new EstabelecimentoImagem();
-//            imagem.setIdEstabelecimento(this.getEstabelecimento().getIdEstabelecimento());
-//            imagem.setEstabelecimento(this.getEstabelecimento());
-//            imagem.setDsImagem(this.getFileName(file));
-//            imagem.setDsTipo(file.getContentType());
-//            imagem.setVlTamanho(file.getSize());
-//            imagem.setFile(file);
-            
-            //EstabelecimentoImagemService.getInstancia().salvarImagem(imagem);
+			this.validarArquivo(file);			
+			this.getNaoConformidade().setFile(file);
+			                        
+            NaoConformidadeService.getInstancia().salvarImagem(this.getNaoConformidade());
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Imagem atualizada com sucesso.", null));
         } 
 		catch (Exception e)
@@ -134,5 +139,13 @@ public class UploadBean extends AbstractBean<NaoConformidade, NaoConformidadeSer
 
 	public void setNaoConformidade(NaoConformidade naoConformidade) {
 		this.naoConformidade = naoConformidade;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
 	}
 }
