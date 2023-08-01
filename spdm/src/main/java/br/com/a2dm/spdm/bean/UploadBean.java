@@ -88,7 +88,7 @@ public class UploadBean extends AbstractBean<NaoConformidade, NaoConformidadeSer
 	}
 	
 	@SuppressWarnings("resource")
-	public String importar()
+	public String salvar()
 	{
 		try
 		{	
