@@ -7,18 +7,12 @@
 	<session-factory>
 		<property name="connection.driver_class">org.postgresql.Driver</property>
 		<property name="connection.url">jdbc:postgresql://localhost:5432/ped</property>
-<<<<<<< Upstream, based on branch 'SP_JP_24_07' of https://github.com/mateusbcavalcante/speciale-web.git
-<<<<<<< HEAD
 		<property name="connection.username">ped</property>
 		<property name="connection.password">@Socio2016</property>
-=======
 		<property name="connection.username">postgres</property>
 		<property name="connection.password">postgres</property>
->>>>>>> 9135b59 (ajuste nao conformidade)
-=======
 		<property name="connection.username">postgres</property>
 		<property name="connection.password">postgres</property>
->>>>>>> 9135b59 ajuste nao conformidade
 		<property name="hibernate.connection.pool_size">25</property>
 		<property name="hibernate.format_sql">true</property>
 		<property name="hibernate.default_schema">ped</property>

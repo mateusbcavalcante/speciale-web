@@ -39,10 +39,6 @@
 	<link rel="shortcut icon" href="../images/favicon.ico" />
 
 
-
-	<!-- Custom Theme JavaScript -->
-
-
 </h:head>
 
 <h:body class="sidebar-mini skin-purple-light">
@@ -62,222 +58,57 @@
 		onstart="#{rich:component('panel_loading')}.show();"
 		onstop="#{rich:component('panel_loading')}.hide();" />
 
-	<h:panelGroup styleClass="form-horizontal" id="contexto">
 		<div class="wrapper">
-			<h:form>
-				<h></h>
-				<header class="main-header"> <h:commandLink
-					action="principal" styleClass="logo">
-					<span class="logo-mini"><img
-						src="../images/GBlogo-sc_ico-c_fogo.png" style="width: 35px;"></img></span>
-					<span class="logo-lg"><img
-						src="../images/GBlogo-neg_pr_hor-c_fogo.png" alt="" width="200px"
-						height="45px;" /></span>
-				</h:commandLink> <!-- Header Navbar: style can be found in header.less --> <nav
-					class="navbar navbar-static-top" role="navigation"> <a
-					href="#" class="sidebar-toggle" data-toggle="offcanvas"
-					role="button"> <span class="sr-only">Toggle navigation</span>
-				</a>
+			<header class="main-header"> <h:commandLink
+				action="principal" styleClass="logo">
+				<span class="logo-mini"><img
+					src="../images/GBlogo-sc_ico-c_fogo.png" style="width: 35px;"></img></span>
+				<span class="logo-lg"><img
+					src="../images/GBlogo-neg_pr_hor-c_fogo.png" alt="" width="200px"
+					height="45px;" /></span>
+			</h:commandLink> <!-- Header Navbar: style can be found in header.less --> <nav
+				class="navbar navbar-static-top" role="navigation"> <a
+				href="#" class="sidebar-toggle" data-toggle="offcanvas"
+				role="button"> <span class="sr-only">Toggle navigation</span>
+			</a>
 
-<<<<<<< Upstream, based on branch 'SP_JP_24_07' of https://github.com/mateusbcavalcante/speciale-web.git
-<<<<<<< HEAD
-				<div class="navbar-custom-menu">
-					<ul class="nav navbar-nav">
+			<div class="navbar-custom-menu">
+				<ul class="nav navbar-nav">
 
-=======
-			<h:form>
-				<div class="navbar-custom-menu">
-					<ul class="nav navbar-nav">
-	
->>>>>>> 9135b59 (ajuste nao conformidade)
-						<li class="dropdown user user-menu"><a href="#"
-							class="dropdown-toggle" data-toggle="dropdown"> <i
-								class="glyphicon glyphicon-user"></i> <span class="hidden-xs"><h:outputText
-										value=" #{sessionScope.loginUsuario.login}" /></span>
-						</a>
-							<ul class="dropdown-menu">
-								<!-- User image -->
-								<li class="user-header"><img src="../images/user.png"
-									class="img-circle" />
-									<p>
-										<h:outputText value=" #{sessionScope.loginUsuario.nome}" />
-										<small><h:outputText
-												value=" #{sessionScope.loginUsuario.email}" /></small>
-									</p></li>
-								<li class="user-footer">
-<<<<<<< HEAD
+					<li class="dropdown user user-menu"><a href="#"
+						class="dropdown-toggle" data-toggle="dropdown"> <i
+							class="glyphicon glyphicon-user"></i> <span class="hidden-xs"><h:outputText
+									value=" #{sessionScope.loginUsuario.login}" /></span>
+					</a>
+						<ul class="dropdown-menu">
+							<!-- User image -->
+							<li class="user-header"><img src="../images/user.png"
+								class="img-circle" />
+								<p>
+									<h:outputText value=" #{sessionScope.loginUsuario.nome}" />
+									<small><h:outputText
+											value=" #{sessionScope.loginUsuario.email}" /></small>
+								</p></li>
+							<li class="user-footer">
 
-									<div class="pull-left">
-										<h:commandLink
-											action="#{alterarSenhaBean.preparaAlterarSenha}"
-											styleClass="btn btn-default btn-flat">
+								<div class="pull-left">
+									<h:commandLink action="#{alterarSenhaBean.preparaAlterarSenha}"
+										styleClass="btn btn-default btn-flat">
 			                      	Alterar Senha
 			                      </h:commandLink>
-									</div>
+								</div>
 
-									<div class="pull-right">
-										<h:commandLink action="#{loginBean.logout}"
-											styleClass="btn btn-default btn-flat">
+								<div class="pull-right">
+									<h:commandLink action="#{loginBean.logout}"
+										styleClass="btn btn-default btn-flat">
 			                      	Logout
 			                      </h:commandLink>
-									</div>
-								</li>
-							</ul></li>
-
-					</ul>
-				</div>
-				</nav> </header>
-
-				<aside class="main-sidebar"> <!-- sidebar: style can be found in sidebar.less -->
-				<section class="sidebar"> <!-- sidebar menu: : style can be found in sidebar.less -->
-				<ul class="sidebar-menu">
-					<li class="header">MENU PRINCIPAL</li>
-
-					<h:panelGroup layout="block"
-						rendered="#{sessionScope.loginUsuario.idGrupo == bundle.grupoCliente}">
-
-						<li class="treeview #{sessionScope.flgMenuPed}"><h:commandLink
-								action="#{pedidoBean.preparaPesquisar}">
-								<i class="fa fa-paper-plane"></i>
-								<span>Pedido</span>
-							</h:commandLink></li>
-
-					</h:panelGroup>
-
-
-					<h:panelGroup layout="block"
-						rendered="#{sessionScope.loginUsuario.idGrupo == bundle.grupoGerente}">
-
-						<li class="treeview #{sessionScope.flgMenuGerPed}"><h:commandLink
-								action="#{geradorPedidoBean.preparaPesquisar}">
-								<i class="fa fa-paper-plane"></i>
-								<span>Gerador de Pedido</span>
-							</h:commandLink></li>
-
-					</h:panelGroup>
-
-					<h:panelGroup layout="block"
-						rendered="#{sessionScope.loginUsuario.idGrupo == bundle.grupoFuncionario or sessionScope.loginUsuario.idGrupo == bundle.grupoGerente}">
-
-						<li class="treeview #{sessionScope.flgMenuRel}"><a href="#">
-								<i class="fa fa-file-text-o"></i> <span>Relatórios</span> <i
-								class="fa fa-angle-left pull-right"></i>
-						</a>
-							<ul class="treeview-menu">
-								<li class="#{sessionScope.flgMenuRelPed}"><h:commandLink
-										action="#{producaoDiaBean.preparaPesquisar}">
-										<i class="fa fa-navicon"></i> Produção do Dia</h:commandLink></li>
-								<li class="#{sessionScope.flgMenuRelPer}"><h:commandLink
-										action="#{producaoPeriodoBean.preparaPesquisar}">
-										<i class="fa fa-building-o"></i> Produção por Período</h:commandLink></li>
-								<li class="#{sessionScope.flgMenuRelLog}"><h:commandLink
-										action="#{logisticaDiaBean.preparaPesquisar}">
-										<i class="fa fa-building-o"></i> Logística do Dia</h:commandLink></li>
-								<li class="#{sessionScope.flgMenuRelObs}"><h:commandLink
-										action="#{observacaoPedidoBean.preparaPesquisar}">
-										<i class="fa fa-building-o"></i> Observações</h:commandLink></li>
-							</ul></li>
-
-					</h:panelGroup>
-
-					<h:panelGroup layout="block"
-						rendered="#{sessionScope.loginUsuario.idGrupo == bundle.grupoFuncionario or sessionScope.loginUsuario.idGrupo == bundle.grupoGerente}">
-
-						<li class="treeview #{sessionScope.flgMenuMan}"><a href="#">
-								<i class="fa fa-cogs"></i> <span>Manutenção</span> <i
-								class="fa fa-angle-left pull-right"></i>
-						</a>
-							<ul class="treeview-menu">
-								<h:panelGroup layout="block"
-									rendered="#{sessionScope.loginUsuario.idGrupo == bundle.grupoGerente}">
-									<li class="#{sessionScope.flgMenuManUsr}"><h:commandLink
-											action="#{usuarioBean.preparaPesquisar}">
-											<i class="fa fa-user"></i> 
-											Usuário
-			                			</h:commandLink></li>
-
-									<li class="#{sessionScope.flgMenuManCli}"><h:commandLink
-											action="#{clienteBean.preparaPesquisar}">
-											<i class="fa fa-user-secret"></i> 
-			                				Cliente
-		                				</h:commandLink></li>
-
-									<li class="#{sessionScope.flgMenuManUsr}"><h:commandLink
-											action="#{feriadoBean.preparaPesquisar}">
-											<i class="fa fa-calendar"></i> 
-			                				Feriado
-		                				</h:commandLink></li>
-
-									<li class="#{sessionScope.flgMenuManCli}"><h:commandLink
-											action="#{sugestaoPedidoBean.preparaPesquisar}">
-											<i class="fa fa-lightbulb-o"></i> 
-			                				Sugestão de Pedido
-		                				</h:commandLink></li>
-
-									<li class="#{sessionScope.flgMenuManCli}"><h:commandLink
-											action="#{avisoBean.preparaPesquisar}">
-											<i class="fa fa-bell"></i> 
-			                				Avisos
-		                				</h:commandLink></li>
-
-									<li class="#{sessionScope.flgMenuManCli}"><h:commandLink
-											action="#{naoConformidadeBean.preparaPesquisar}">
-											<i class="fa fa-thumbs-o-down"></i> 
-			                				Não Conformidades
-		                				</h:commandLink></li>
-
-								</h:panelGroup>
-							</ul></li>
-
-					</h:panelGroup>
+								</div>
+							</li>
+						</ul></li>
 
 				</ul>
-
-				</section> <!-- /.sidebar --> </aside>
-			</h:form>
-=======
-=======
-			<h:form>
-				<div class="navbar-custom-menu">
-					<ul class="nav navbar-nav">
-	
-						<li class="dropdown user user-menu"><a href="#"
-							class="dropdown-toggle" data-toggle="dropdown"> <i
-								class="glyphicon glyphicon-user"></i> <span class="hidden-xs"><h:outputText
-										value=" #{sessionScope.loginUsuario.login}" /></span>
-						</a>
-							<ul class="dropdown-menu">
-								<!-- User image -->
-								<li class="user-header"><img src="../images/user.png"
-									class="img-circle" />
-									<p>
-										<h:outputText value=" #{sessionScope.loginUsuario.nome}" />
-										<small><h:outputText
-												value=" #{sessionScope.loginUsuario.email}" /></small>
-									</p></li>
-								<li class="user-footer">
->>>>>>> 9135b59 ajuste nao conformidade
-	
-									<div class="pull-left">
-										<h:commandLink action="#{alterarSenhaBean.preparaAlterarSenha}"
-											styleClass="btn btn-default btn-flat">
-				                      	Alterar Senha
-				                      </h:commandLink>
-									</div>
-	
-									<div class="pull-right">
-										<h:commandLink action="#{loginBean.logout}"
-											styleClass="btn btn-default btn-flat">
-				                      	Logout
-				                      </h:commandLink>
-									</div>
-								</li>
-							</ul></li>
-	
-					</ul>
-				</div>
-			</h:form>
-			
+			</div>
 			</nav> </header>
 
 			<aside class="main-sidebar"> <!-- sidebar: style can be found in sidebar.less -->
@@ -376,13 +207,9 @@
 				</h:panelGroup>
 
 			</ul>
-			</section> <!-- /.sidebar -->
-			</h:form>
-			 </aside>
-<<<<<<< Upstream, based on branch 'SP_JP_24_07' of https://github.com/mateusbcavalcante/speciale-web.git
->>>>>>> 9135b59 (ajuste nao conformidade)
-=======
->>>>>>> 9135b59 ajuste nao conformidade
+			</section> 
+			</h:form><!-- /.sidebar -->
+			</aside>
 
 			<div class="content-wrapper">
 				<section class="content"> <!-- Horizontal Form -->
@@ -430,7 +257,7 @@
 				Copyright &copy; 2016 <a href="http://a2dm.com.br" target="_blank">A2DM</a>.</strong>
 			Todos os direitos reservados. </footer>
 		</div>
-	</h:panelGroup>
+
 
 	<script src="../js/custom.js"></script>
 	<script src="../js/cep.js"></script>

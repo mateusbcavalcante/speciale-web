@@ -1,67 +1,3 @@
-<ui:composition xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:a4j="http://richfaces.org/a4j"
-	xmlns:rich="http://richfaces.org/rich"
-	xmlns:mj="http://mojarra.dev.java.net/mojarra_ext"
-	xmlns:t="http://myfaces.apache.org/tomahawk"
-	xmlns:c="http://java.sun.com/jstl/core"
-	template="crud_template_upload.xhtml">
-
-<<<<<<< HEAD
-	<ui:param name="crudBean" value="#{uploadBean}" />
-
-	<ui:define name="content">
-		<h:panelGroup id="panelGroupDeEdicao"
-			style="height:100%;width:100%; display: flex; flex-direction: column; align-items: center;">
-			<f:subview id="viewEdicao">
-				<div class="well" data-bind="fileDrag: fileData"
-					style="display: flex; flex-direction: column; align-items: center;">
-					<h:form id="form" enctype="multipart/form-data">
-						<div
-							style="border: 2px dashed #ccc; padding: 20px; display: flex; justify-content: center; align-items: center;">
-							<div
-								style="padding-right: 10px; display: flex; justify-content: center; align-items: center;">
-								<h:graphicImage library="images" value="#{uploadBean.image}"
-									style="max-height: 50vh; max-width: 50vw; height: auto; width: auto;"
-									alt="Nenhuma foto associada" />
-								<h:outputText value="#{uploadBean.image}"></h:outputText>
-
-							</div>
-						</div>
-						<div
-							style="padding-top: 10px; display: flex; justify-content: center; align-items: center;">
-							<label class="btn btn-primary"> <h:inputFile
-									value="#{uploadBean.part}" accept="image/*"
-									style="display: none;" /> Selecionar Foto (S)
-							</label>
-
-							<h:commandButton id="alterar" styleClass="btn btn-primary"
-								value="Gravar (G)" accesskey="S" action="#{crudBean.upload}"
-								style="margin-left: 10px;"></h:commandButton>
-
-							<h:commandButton id="aaaa" styleClass="btn btn-primary"
-								value="Print" accesskey="S" action="#{crudBean.print}"
-								style="margin-left: 10px;"></h:commandButton>
-
-							<h:commandLink action="#{uploadBean.cancelar}">
-								<h:commandButton id="cancelar" styleClass="btn btn-primary"
-									value="Cancelar (C)" accesskey="S" style="margin-left: 10px;"></h:commandButton>
-							</h:commandLink>
-
-						</div>
-					</h:form>
-				</div>
-
-			</f:subview>
-		</h:panelGroup>
-	</ui:define>
-
-	<ui:define name="buttonItens" style="height:100%; width:100%;"></ui:define>
-
-</ui:composition>
-=======
 <ui:composition	xmlns="http://www.w3.org/1999/xhtml"
 			    xmlns:ui="http://java.sun.com/jsf/facelets"
 			    xmlns:h="http://java.sun.com/jsf/html"
@@ -119,16 +55,18 @@
 				</div>
                	<br/>
                	
+               	<h:commandButton id="salvar" styleClass="btn btn-primary" value="Salvar (S)" accesskey="S" action="#{crudBean.salvar}">
+               		
+        </h:commandButton>
+               	
 				</h:form>
 			</f:subview>
 		</h:panelGroup>	
 	</ui:define>
 	
 	<ui:define name="buttonItens" style="height:100%; width:100%;">
-		<h:commandButton id="salvar" styleClass="btn btn-primary" value="Salvar (S)" accesskey="S" action="#{crudBean.salvar}">
-               		
-               	</h:commandButton>
-	</ui:define>	
 	
+		
+	
+	</ui:define>	
 </ui:composition>
->>>>>>> 9135b59 (ajuste nao conformidade)
