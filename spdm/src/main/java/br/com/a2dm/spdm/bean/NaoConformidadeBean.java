@@ -11,10 +11,6 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.RequestScoped;
 import javax.faces.context.FacesContext;
-<<<<<<< HEAD
-import javax.faces.event.ActionEvent;
-=======
->>>>>>> 9135b59 (ajuste nao conformidade)
 
 import br.com.a2dm.brcmn.dto.ProdutoDTO;
 import br.com.a2dm.brcmn.util.jsf.AbstractBean;
@@ -27,7 +23,6 @@ import br.com.a2dm.spdm.entity.Produto;
 import br.com.a2dm.spdm.omie.service.OmieProdutoService;
 import br.com.a2dm.spdm.service.ClienteService;
 import br.com.a2dm.spdm.service.NaoConformidadeService;
-import br.com.a2dm.spdm.service.ProdutoService;
 
 @RequestScoped
 @ManagedBean
