@@ -9,6 +9,7 @@
 	xmlns:c="http://java.sun.com/jstl/core"
 	template="crud_template_upload.xhtml">
 
+<<<<<<< HEAD
 	<ui:param name="crudBean" value="#{uploadBean}" />
 
 	<ui:define name="content">
@@ -60,3 +61,74 @@
 	<ui:define name="buttonItens" style="height:100%; width:100%;"></ui:define>
 
 </ui:composition>
+=======
+<ui:composition	xmlns="http://www.w3.org/1999/xhtml"
+			    xmlns:ui="http://java.sun.com/jsf/facelets"
+			    xmlns:h="http://java.sun.com/jsf/html"
+				xmlns:f="http://java.sun.com/jsf/core"
+				xmlns:a4j="http://richfaces.org/a4j"
+				xmlns:rich="http://richfaces.org/rich"
+				xmlns:mj="http://mojarra.dev.java.net/mojarra_ext"
+				xmlns:t="http://myfaces.apache.org/tomahawk"
+				template="crud_template_upload.xhtml">
+			
+			
+	<ui:param name="crudBean" value="#{uploadBean}" />
+	
+	<ui:define name="saveStateObjectsDefined">
+		<h:form>
+		<t:saveState value="#{crudBean.naoConformidade}" />
+		</h:form>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:panelGroup id="panelGroupDeEdicao" style="height:100%;width:100%;">
+			<f:subview id="viewEdicao">
+				<h:form id="form" enctype="multipart/form-data">	
+				
+				
+				<div class="container">
+				  	<h4>
+				 		 <h:outputText value="Produto: "/>
+				 		 <h:outputText value="#{crudBean.naoConformidade.descricaoProduto}"/>
+				  	</h4>
+				  	
+				  	
+				  	<br/><br/><br/>
+				  	
+				</div>
+			
+				<div class="container">					
+					<div class="well" data-bind="fileDrag: fileData">
+					    <div class="form-group row">
+					        <div class="col-md-6">
+					            <img style="height: 330px; width: 330px; border-radius: 10%;" class="img-rounded  thumb" data-bind="attr: { src: fileData().dataURL }, visible: fileData().dataURL"/>
+					            <div data-bind="ifnot: fileData().dataURL">
+					                <label class="drag-label">Arraste o arquivo aqui.</label>
+					            </div>
+					        </div>
+					        <div class="col-md-6">
+					            <input type="file" name="file" data-bind="fileInput: fileData, customFileInput: {
+					              buttonClass: 'btn btn-success',
+					              fileNameClass: 'disabled form-control',
+					              onClear: onClear,
+					            }" accept="image/*"/>
+					        </div>
+					    </div>
+					</div>
+				</div>
+               	<br/>
+               	
+				</h:form>
+			</f:subview>
+		</h:panelGroup>	
+	</ui:define>
+	
+	<ui:define name="buttonItens" style="height:100%; width:100%;">
+		<h:commandButton id="alterar" styleClass="btn btn-primary" value="Alterar (A)" accesskey="S" action="#{crudBean.importar}">
+               		
+               	</h:commandButton>
+	</ui:define>	
+	
+</ui:composition>
+>>>>>>> 9135b59 (ajuste nao conformidade)
