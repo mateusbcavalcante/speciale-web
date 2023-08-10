@@ -43,10 +43,10 @@ public class UploadBean extends AbstractBean<NaoConformidade, NaoConformidadeSer
 						
 			if(naoConformidade != null) {
 				Parametro parametro = new Parametro();
-				parametro.setDescricao("PATH_IMG_NAO_CONFORMIDADE");
+				parametro.setDescricao("PATH_LEITURA_IMG_NAO_CONFORMIDADE");
 				parametro = ParametroService.getInstancia().get(parametro, 0);
 				
-				this.path = parametro.getValor() + "NC" + naoConformidade.getIdNaoConformidade();
+				this.path = parametro.getValor() + "NC" + naoConformidade.getIdNaoConformidade() + ".jpg";
 			}
 			
 			
@@ -70,13 +70,13 @@ public class UploadBean extends AbstractBean<NaoConformidade, NaoConformidadeSer
 
         if (arquivo.getSize() > (2*1024*1024))
         {
-            throw new Exception("Arquivo muito grande. O arquivo deve ter o tamanho máximo de 2mb.");
+            throw new Exception("Arquivo muito grande. O arquivo deve ter, no máximo, 2mb.");
         }
 
         if (!"image/jpg".equals(arquivo.getContentType())
         		&& !"image/jpeg".equals(arquivo.getContentType()))
         {
-            throw new Exception("Tipo de arquivo inválido, O arquivo deve ser dos tipos: .JPG ou .JPEG");
+            throw new Exception("Tipo de arquivo inválido. O arquivo deve ser dos tipos: .jpg ou .jpeg");
         }
     }
 	

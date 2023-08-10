@@ -23,7 +23,6 @@ import br.com.a2dm.spdm.entity.Produto;
 import br.com.a2dm.spdm.omie.service.OmieProdutoService;
 import br.com.a2dm.spdm.service.ClienteService;
 import br.com.a2dm.spdm.service.NaoConformidadeService;
-import br.com.a2dm.spdm.service.ProdutoService;
 
 @RequestScoped
 @ManagedBean
@@ -131,16 +130,47 @@ public class NaoConformidadeBean extends AbstractBean<NaoConformidade, NaoConfor
 					                                   .findFirst();
 			
 			if (produtoOptional.isPresent()) {
-				produtoSelecionado = produtoOptional.get();
+				produto = produtoOptional.get();
 				
-				if (produtoSelecionado.getValorUnitario() == null || produtoSelecionado.getValorUnitario() <= 0) {
+				if (produto.getValorUnitario() == null || produto.getValorUnitario() <= 0) {
 					this.setInformacao("O produto selecionado não tem valor unitário.");
 				}
 			}
 					                                
 		} else {
-			setProdutoSelecionado(null);
+			setProduto(null);
 		}
+	}
+	
+	@Override
+	public void preparaAlterar() 
+	{
+		try
+		{
+			if(validarAcesso(Variaveis.ACAO_PREPARA_ALTERAR))
+			{
+				super.preparaAlterar();
+				this.buscarProdutos();
+				
+				
+				Optional<Produto> produtoOptional = this.getListaProduto().stream()
+                        .filter(x -> x.getIdProduto() != null 
+                             && this.getEntity().getIdProduto().longValue() > 0 
+                             && x.getIdProduto().longValue() == this.getEntity().getIdProduto().longValue())
+                        .findFirst();
+
+				if (produtoOptional.isPresent()) {
+					produtoSelecionado = produtoOptional.get();
+					produto = produtoOptional.get();
+				}
+			} 
+		}
+	    catch (Exception e)
+	    {
+	       FacesMessage message = new FacesMessage(e.getMessage());
+	       message.setSeverity(FacesMessage.SEVERITY_ERROR);
+	       FacesContext.getCurrentInstance().addMessage(null, message);
+	    }
 	}
 	
 	public BigInteger getIdNaoConformidade() {
@@ -210,6 +240,8 @@ public class NaoConformidadeBean extends AbstractBean<NaoConformidade, NaoConfor
 	@Override
 	protected void completarAlterar() throws Exception {
 		this.validarInserir();		
+		this.getEntity().setIdProduto(this.getProduto().getIdProduto());
+		this.getEntity().setDescricaoProduto(this.getProduto().getDesProduto());
 		this.getEntity().setDatAlteracao(new Date());
 		this.getEntity().setIdUsuarioAlt(util.getUsuarioLogado().getIdUsuario());
 	}
