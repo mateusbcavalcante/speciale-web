@@ -25,6 +25,7 @@ import br.com.a2dm.spdm.entity.Pedido;
 import br.com.a2dm.spdm.entity.PedidoProduto;
 import br.com.a2dm.spdm.entity.Produto;
 import br.com.a2dm.spdm.omie.service.OmiePedidoService;
+import br.com.a2dm.spdm.omie.service.OmieProdutoEstruturaService;
 import br.com.a2dm.spdm.omie.service.OmieProdutoService;
 import br.com.a2dm.spdm.service.ClienteService;
 import br.com.a2dm.spdm.service.OpcaoEntregaService;
@@ -196,6 +197,10 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 				if (produtoSelecionado.getValorUnitario() == null || produtoSelecionado.getValorUnitario() <= 0) {
 					this.setInformacao("O produto selecionado não tem valor unitário.");
 				}
+				
+				produtoSelecionado.setUnidade(OmieProdutoEstruturaService.getInstance().
+						obterProdutoEstrutura(produtoSelecionado.getIdProduto()).
+						getIdentDTO().getUnidProduto()); 
 			}
 					                                
 		} else {
@@ -271,6 +276,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 						produto.setValorUnitario(element.getValorUnitario());
 						produto.setFlgAtivo("S");
 						produto.setQtdSolicitada(element.getQtdSolicitada());
+						produto.setUnidade(element.getUnidade());
 						pedido.getCliente().getListaProduto().add(produto);
 					}
 				}
@@ -333,6 +339,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 						produto.setValorUnitario(element.getValorUnitario());
 						produto.setFlgAtivo("S");
 						produto.setQtdSolicitada(element.getQtdSolicitada());
+						produto.setUnidade(element.getUnidade());
 						pedido.getCliente().getListaProduto().add(produto);
 					}
 				}
@@ -450,6 +457,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 				pedidoProduto.getProduto().setFlgAtivo("S");
 				pedidoProduto.getProduto().setValorUnitario(element.getValorUnitario());
 				pedidoProduto.setQtdSolicitada(element.getQtdSolicitada());
+				pedidoProduto.getProduto().setUnidade(element.getUnidade());
 				
 				pedido.getListaPedidoProduto().add(pedidoProduto);
 			}
@@ -534,6 +542,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 						produto.setDesProduto(produtoOptional.get().getDesProduto());
 						produto.setQtdSolicitada(this.getQtdSolicitada());
 						produto.setFlgAtivo("S");
+						produto.setUnidade(produtoOptional.get().getUnidade());
 						
 						element.getCliente().getListaProduto().add(produto);
 					}
@@ -552,6 +561,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 				produto.setDesProduto(produtoOptional.get().getDesProduto());
 				produto.setQtdSolicitada(this.getQtdSolicitada());
 				produto.setFlgAtivo("S");
+				produto.setUnidade(produtoOptional.get().getUnidade());
 				
 				Cliente cliente = new Cliente();
 				cliente.setIdCliente(this.getEntity().getIdCliente());
