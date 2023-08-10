@@ -318,7 +318,7 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 				this.getPedidoResult().getCliente().setListaProduto(this.getPedidoResult().getListaProduto());
 				this.getPedidoResult().setObservacao("");
 				
-				PedidoService.getInstancia().inserirPedido(this.getPedidoResult());
+				PedidoService.getInstancia().inserirSugestaoPedido(this.getPedidoResult());
 				
 				// INSERINDO ITENS
 				this.getEntity().setItens(null);
