@@ -124,7 +124,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 		ArrayList<OpcaoEntrega> lista = new ArrayList<>();
 		OpcaoEntrega opcaoEntrega = new OpcaoEntrega();
 		opcaoEntrega.setIdOpcaoEntrega(null);
-		opcaoEntrega.setDesOpcaoEntrega("Escolha a Opção de Entrega");		
+		opcaoEntrega.setDesOpcaoEntrega("Selecione");		
 		lista.add(opcaoEntrega);
 		
 		this.setListaOpcaoEntrega(lista);

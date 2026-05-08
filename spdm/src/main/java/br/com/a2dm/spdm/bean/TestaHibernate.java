@@ -16,7 +16,7 @@ public class TestaHibernate extends AbstractBean<Usuario, UsuarioService> {
 	public static void main(String[] args) throws SQLException {
 		try {
 			Class.forName("org.postgresql.Driver");
-			DriverManager.getConnection("jdbc:postgresql://ped.postgres.uhserver.com:5432/ped", "ped", "@Socio2016");
+			DriverManager.getConnection("jdbc:postgresql://189.126.111.74:5432/ped", "ped", "@Socio2016");
 			System.out.println("Conectado");
 		} catch (ClassNotFoundException e) {
 			System.out.println("Não conectado");
