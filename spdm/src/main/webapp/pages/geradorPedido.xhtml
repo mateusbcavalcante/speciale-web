@@ -152,8 +152,8 @@
 											<rich:column style="width: 64%; text-align: center;">
 												Produto
 											</rich:column>
-											<rich:column style="width: 5%; text-align: center;">
-												Observação
+											<rich:column style="width: 8%; text-align: center;">
+												Observação / Nº Pedido
 											</rich:column>
 											<rich:column style="width: 5%; text-align: center;">
 												Opção Entrega
@@ -208,7 +208,12 @@
 									</rich:column>
 									
 									<rich:column style="text-align: left;">
-										<h:inputTextarea cols="15" rows="4" id="obsPedido" onkeyup="verificaTamanho(this, 400, 'lblObsPedido');" value="#{rst.obsPedido}" /> 
+										<h:inputTextarea cols="15" rows="4" id="obsPedido" onkeyup="verificaTamanho(this, 400, 'lblObsPedido');" value="#{rst.obsPedido}" />
+										<h:panelGroup rendered="#{rst.clienteSupermercado}">
+											<br/>
+											<label>Nº Pedido Cliente:</label>
+											<h:inputText value="#{rst.numeroPedidoCliente}" styleClass="form-control" maxlength="30" style="width: 150px; display: initial;"/>
+										</h:panelGroup>
 									</rich:column>
 									
 									<rich:column style="text-align: left;">

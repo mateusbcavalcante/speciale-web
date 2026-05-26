@@ -81,6 +81,8 @@
 					<h:outputText value=" "/>
 					<t:commandLink target="_blank" id="imprimir" action="#{crudBean.imprimir}" styleClass="btn btn-primary" value="Imprimir (I)"/>
 					<h:outputText value=" "/>
+					<t:commandLink id="exportarExcel" action="#{crudBean.exportarExcel}" styleClass="btn btn-primary" value="Exportar Excel (E)"/>
+					<h:outputText value=" "/>
 					<a4j:commandButton id="observacao" styleClass="btn btn-primary" value="+ Observacao (O)" accesskey="O" actionListener="#{crudBean.preparaObservacao}" oncomplete="#{rich:component('panObservacaoLogistica')}.show();" rendered="#{not empty crudBean.searchResult and crudBean.searching}" render="panObservacaoLogistica"/>
 				</h:panelGroup>	
              </div>

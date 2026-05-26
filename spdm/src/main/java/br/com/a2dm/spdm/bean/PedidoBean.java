@@ -534,6 +534,8 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 			produto.setDesProduto(produtoOptional.get().getDesProduto());
 			produto.setQtdSolicitada(this.getQtdSolicitada());
 			produto.setFlgAtivo("S");
+			produto.setCodigoFamiliaOmie(produtoOptional.get().getCodigoFamiliaOmie());
+			produto.setDescricaoFamilia(produtoOptional.get().getDescricaoFamilia());
 			
 			this.getListaProdutoResult().add(0, produto);
 			this.getProduto().setIdProduto(null);
@@ -665,6 +667,7 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 				if (produtoSelecionado.getValorUnitario() == null || produtoSelecionado.getValorUnitario() <= 0) {
 					this.setInformacao("O produto selecionado não tem valor unitário.");
 				}
+				OmieProdutoService.getInstance().enriquecerFamiliaProduto(produtoSelecionado);
 			}
 					                                
 		} else {

@@ -188,6 +188,8 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 			produto.setQtdSolicitada(this.getQtdSolicitada());
 			produto.setFlgAtivo("S");
 			produto.setUnidade(produtoOptional.get().getUnidade());
+			produto.setCodigoFamiliaOmie(produtoOptional.get().getCodigoFamiliaOmie());
+			produto.setDescricaoFamilia(produtoOptional.get().getDescricaoFamilia());
 			
 			if (this.pedidoResult != null &&
 					(this.pedidoResult.getListaProduto() == null || this.pedidoResult.getListaProduto().size() <= 0)) {
@@ -278,7 +280,8 @@ public class SugestaoPedidoBean extends AbstractBean<SugestaoPedido, SugestaoPed
 				
 				produtoSelecionado.setUnidade(OmieProdutoEstruturaService.getInstance().
 						obterProdutoEstrutura(produtoSelecionado.getIdProduto()).
-						getIdentDTO().getUnidProduto()); 
+						getIdentDTO().getUnidProduto());
+				OmieProdutoService.getInstance().enriquecerFamiliaProduto(produtoSelecionado);
 			}
 					                                
 		} else {

@@ -24,6 +24,7 @@ import br.com.a2dm.spdm.entity.OpcaoEntrega;
 import br.com.a2dm.spdm.entity.Pedido;
 import br.com.a2dm.spdm.entity.PedidoProduto;
 import br.com.a2dm.spdm.entity.Produto;
+import br.com.a2dm.spdm.omie.service.OmieClienteService;
 import br.com.a2dm.spdm.omie.service.OmiePedidoService;
 import br.com.a2dm.spdm.omie.service.OmieProdutoEstruturaService;
 import br.com.a2dm.spdm.omie.service.OmieProdutoService;
@@ -142,6 +143,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 			cliente.setFlgAtivo("S");
 			cliente.setIdCliente(this.getEntity().getIdCliente());
 			cliente = ClienteService.getInstancia().get(cliente, 0);
+			this.getEntity().setClienteSupermercado(carregarClienteSupermercado(cliente));
 			
 			if (cliente != null) {
 				
@@ -173,6 +175,21 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 		}
 	}
 	
+	private boolean carregarClienteSupermercado(Cliente cliente) throws Exception {
+		if (cliente != null && cliente.getIdExternoOmie() != null) {
+			return OmieClienteService.getInstance()
+					.pesquisarClienteComCaracteristicas(cliente.getIdExternoOmie())
+					.isSupermercado();
+		}
+		return false;
+	}
+
+	private void aplicarCaracteristicasCliente(Pedido pedido) throws Exception {
+		if (pedido.getCliente() != null) {
+			pedido.setClienteSupermercado(carregarClienteSupermercado(pedido.getCliente()));
+		}
+	}
+
 	private void iniciaListaProdutos()
 	{
 		ArrayList<Produto> lista = new ArrayList<Produto>();
@@ -200,7 +217,8 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 				
 				produtoSelecionado.setUnidade(OmieProdutoEstruturaService.getInstance().
 						obterProdutoEstrutura(produtoSelecionado.getIdProduto()).
-						getIdentDTO().getUnidProduto()); 
+						getIdentDTO().getUnidProduto());
+				OmieProdutoService.getInstance().enriquecerFamiliaProduto(produtoSelecionado);
 			}
 					                                
 		} else {
@@ -265,6 +283,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 				cliente.setIdCliente(pedidoDTO.getIdCliente());
 				cliente = ClienteService.getInstancia().get(cliente, 0);
 				pedido.setCliente(cliente);
+				aplicarCaracteristicasCliente(pedido);
 				pedido.getCliente().setListaProduto(new ArrayList<>());
 				
 				if (pedidoDTO.getProdutos() != null
@@ -328,6 +347,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 				cliente.setIdCliente(pedidoDTO.getIdCliente());
 				cliente = ClienteService.getInstancia().get(cliente, 0);
 				pedido.setCliente(cliente);
+				aplicarCaracteristicasCliente(pedido);
 				pedido.getCliente().setListaProduto(new ArrayList<>());
 				
 				if (pedidoDTO.getProdutos() != null
@@ -518,6 +538,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 					if(element.getCliente().getIdCliente().longValue() == this.getEntity().getIdCliente().longValue())
 					{
 						existeCliente = true;
+						aplicarCaracteristicasCliente(element);
 						for (Produto elementProduto : element.getCliente().getListaProduto()) {
 							if (elementProduto.getIdProduto().longValue() == produto.getIdProduto().longValue()) {
 								if (elementProduto.getFlgAtivo().equalsIgnoreCase("S")) {
@@ -543,6 +564,8 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 						produto.setQtdSolicitada(this.getQtdSolicitada());
 						produto.setFlgAtivo("S");
 						produto.setUnidade(produtoOptional.get().getUnidade());
+						produto.setCodigoFamiliaOmie(produtoOptional.get().getCodigoFamiliaOmie());
+						produto.setDescricaoFamilia(produtoOptional.get().getDescricaoFamilia());
 						
 						element.getCliente().getListaProduto().add(produto);
 					}
@@ -562,6 +585,8 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 				produto.setQtdSolicitada(this.getQtdSolicitada());
 				produto.setFlgAtivo("S");
 				produto.setUnidade(produtoOptional.get().getUnidade());
+				produto.setCodigoFamiliaOmie(produtoOptional.get().getCodigoFamiliaOmie());
+				produto.setDescricaoFamilia(produtoOptional.get().getDescricaoFamilia());
 				
 				Cliente cliente = new Cliente();
 				cliente.setIdCliente(this.getEntity().getIdCliente());
@@ -573,6 +598,7 @@ public class GeradorPedidoBean extends AbstractBean<Pedido, PedidoService>
 				pedido.setFlgAtivo("S");
 				pedido.setDatPedido(new Date());
 				pedido.setCliente(cliente);
+				aplicarCaracteristicasCliente(pedido);
 				
 				if (pedido.getCliente().getListaProduto() == null) {
 					pedido.getCliente().setListaProduto(new ArrayList<>());

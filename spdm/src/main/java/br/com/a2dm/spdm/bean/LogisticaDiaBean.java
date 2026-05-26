@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -32,6 +33,8 @@ import br.com.a2dm.spdm.service.ObservacaoLogisticaService;
 import br.com.a2dm.spdm.service.OpcaoEntregaService;
 import br.com.a2dm.spdm.service.PedidoService;
 import br.com.a2dm.spdm.service.ReceitaService;
+import br.com.a2dm.spdm.utils.RelatorioExportUtil;
+import br.com.a2dm.spdm.utils.RelatorioPedidoCalculoUtil;
 
 
 @RequestScoped
@@ -252,6 +255,49 @@ public class LogisticaDiaBean extends AbstractBean<Pedido, PedidoService>
 		}
 	}
 	
+	public void exportarExcel() {
+		try {
+			if (getSearchResult() == null || getSearchResult().isEmpty()) {
+				FacesContext.getCurrentInstance().addMessage(null,
+						new FacesMessage(FacesMessage.SEVERITY_ERROR, "Não existem dados para exportar.", null));
+				return;
+			}
+
+			List<String> cabecalhos = Arrays.asList("Cliente", "Unidade", "Pacotes", "Caixas");
+			List<String[]> linhas = new ArrayList<>();
+
+			for (Pedido pedido : getSearchResult()) {
+				if (pedido.getListaPedidoProduto() == null) {
+					continue;
+				}
+				for (PedidoProduto pedidoProduto : pedido.getListaPedidoProduto()) {
+					linhas.add(new String[] {
+							escapar(pedido.getCliente().getDesCliente()),
+							escapar(RelatorioPedidoCalculoUtil.resolverUnidade(pedidoProduto)),
+							String.valueOf(RelatorioPedidoCalculoUtil.calcularPacotes(pedidoProduto)),
+							String.valueOf(RelatorioPedidoCalculoUtil.calcularCaixas(pedidoProduto)) });
+				}
+			}
+
+			HttpServletResponse response = (HttpServletResponse) FacesContext.getCurrentInstance().getExternalContext()
+					.getResponse();
+			String data = new SimpleDateFormat("yyyyMMdd").format(getSearchObject().getDatPedido());
+			RelatorioExportUtil.exportarCsvExcel(response, "logistica-dia-" + data + ".xls", cabecalhos, linhas);
+			FacesContext.getCurrentInstance().responseComplete();
+		} catch (Exception e) {
+			FacesMessage message = new FacesMessage(e.getMessage());
+			message.setSeverity(FacesMessage.SEVERITY_ERROR);
+			FacesContext.getCurrentInstance().addMessage(null, message);
+		}
+	}
+
+	private String escapar(String valor) {
+		if (valor == null) {
+			return "";
+		}
+		return valor.replace(";", ",").replace("\n", " ").replace("\r", " ");
+	}
+
 	@Override
 	@SuppressWarnings({ "unchecked", "deprecation", "rawtypes" })
 	public void configuraRelatorio(Map parameters, HttpServletRequest request)

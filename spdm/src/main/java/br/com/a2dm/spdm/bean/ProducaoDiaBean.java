@@ -5,6 +5,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -24,9 +25,12 @@ import br.com.a2dm.brcmn.util.jsf.Variaveis;
 import br.com.a2dm.brcmn.util.validacoes.ValidaPermissao;
 import br.com.a2dm.spdm.config.MenuControl;
 import br.com.a2dm.spdm.entity.ObservacaoProducao;
+import br.com.a2dm.spdm.entity.PedidoProduto;
 import br.com.a2dm.spdm.entity.Produto;
 import br.com.a2dm.spdm.service.ObservacaoProducaoService;
 import br.com.a2dm.spdm.service.ProdutoService;
+import br.com.a2dm.spdm.utils.RelatorioExportUtil;
+import br.com.a2dm.spdm.utils.RelatorioPedidoCalculoUtil;
 
 
 @RequestScoped
@@ -114,7 +118,9 @@ public class ProducaoDiaBean extends AbstractBean<Produto, ProdutoService>
 				
 				for (Produto produto : lista)
 				{
-					produto.setQtdMassa(produto.getQtdMassaCrua().doubleValue() * produto.getQtdSolicitada().doubleValue());
+					double qtdMassaCrua = produto.getQtdMassaCrua() != null ? produto.getQtdMassaCrua().doubleValue() : 0;
+					double qtdSolicitada = produto.getQtdSolicitada() != null ? produto.getQtdSolicitada().doubleValue() : 0;
+					produto.setQtdMassa(qtdMassaCrua * qtdSolicitada);
 					qtdTotalMassa += produto.getQtdMassa();
 					produto.setQtdMassaInt((int) produto.getQtdMassa());
 				}
@@ -225,6 +231,57 @@ public class ProducaoDiaBean extends AbstractBean<Produto, ProdutoService>
 		}
 	}
 	
+	public void exportarExcel() {
+		try {
+			validarPesquisar();
+			List<Produto> consolidado = ProdutoService.getInstancia()
+					.pesquisarProducaoDiaConsolidado(getSearchObject());
+			if (consolidado == null || consolidado.isEmpty()) {
+				FacesContext.getCurrentInstance().addMessage(null,
+						new FacesMessage(FacesMessage.SEVERITY_ERROR, "Não existem dados para exportar.", null));
+				return;
+			}
+
+			List<String> cabecalhos = Arrays.asList("Família", "Produto", "Quantidade", "Caixas", "Pacotes");
+			List<String[]> linhas = new ArrayList<>();
+
+			for (Produto produto : consolidado) {
+				PedidoProduto referencia = new PedidoProduto();
+				referencia.setQtdSolicitada(produto.getQtdSolicitada());
+				referencia.setUnidade(produto.getUnidade());
+				Produto produtoRef = new Produto();
+				produtoRef.setFlgIntegral(produto.getFlgIntegral());
+				referencia.setProduto(produtoRef);
+
+				String familia = produto.getFamilia() != null ? produto.getFamilia().getDesFamilia() : "";
+
+				linhas.add(new String[] {
+						escapar(familia),
+						escapar(produto.getDesProduto()),
+						String.valueOf(produto.getQtdSolicitada()),
+						String.valueOf(RelatorioPedidoCalculoUtil.calcularCaixas(referencia)),
+						String.valueOf(RelatorioPedidoCalculoUtil.calcularPacotes(referencia)) });
+			}
+
+			HttpServletResponse response = (HttpServletResponse) FacesContext.getCurrentInstance().getExternalContext()
+					.getResponse();
+			String data = new SimpleDateFormat("yyyyMMdd").format(getSearchObject().getDatPedido());
+			RelatorioExportUtil.exportarCsvExcel(response, "producao-diaria-" + data + ".xls", cabecalhos, linhas);
+			FacesContext.getCurrentInstance().responseComplete();
+		} catch (Exception e) {
+			FacesMessage message = new FacesMessage(e.getMessage());
+			message.setSeverity(FacesMessage.SEVERITY_ERROR);
+			FacesContext.getCurrentInstance().addMessage(null, message);
+		}
+	}
+
+	private String escapar(String valor) {
+		if (valor == null) {
+			return "";
+		}
+		return valor.replace(";", ",").replace("\n", " ").replace("\r", " ");
+	}
+
 	@Override
 	@SuppressWarnings({ "unchecked", "deprecation", "rawtypes" })
 	public void configuraRelatorio(Map parameters, HttpServletRequest request)
