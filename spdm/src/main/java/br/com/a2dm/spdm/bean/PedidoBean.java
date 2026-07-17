@@ -29,6 +29,7 @@ import br.com.a2dm.spdm.entity.Pedido;
 import br.com.a2dm.spdm.entity.PedidoProduto;
 import br.com.a2dm.spdm.entity.Produto;
 import br.com.a2dm.spdm.omie.service.OmiePedidoService;
+import br.com.a2dm.spdm.omie.service.OmieProdutoEstruturaService;
 import br.com.a2dm.spdm.omie.service.OmieProdutoService;
 import br.com.a2dm.spdm.service.ClienteService;
 import br.com.a2dm.spdm.service.OpcaoEntregaService;
@@ -667,6 +668,9 @@ public class PedidoBean extends AbstractBean<Pedido, PedidoService>
 				if (produtoSelecionado.getValorUnitario() == null || produtoSelecionado.getValorUnitario() <= 0) {
 					this.setInformacao("O produto selecionado não tem valor unitário.");
 				}
+				produtoSelecionado.setUnidade(OmieProdutoEstruturaService.getInstance().
+						obterProdutoEstrutura(produtoSelecionado.getIdProduto()).
+						getIdentDTO().getUnidProduto());
 				OmieProdutoService.getInstance().enriquecerFamiliaProduto(produtoSelecionado);
 			}
 					                                
